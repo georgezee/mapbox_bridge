@@ -1,0 +1,7 @@
+name = Mapbox bridge
+description = Bridge Mapbox with Drupal
+core = 7.x
+package = Mapbox
+configure = admin/config/user-interface/superfish
+
+dependencies[] = geofield

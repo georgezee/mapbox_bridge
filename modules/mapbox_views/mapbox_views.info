@@ -1,0 +1,10 @@
+name = Mapbox for views
+description = Use Mapbox inside views
+core = 7.x
+package = Mapbox
+
+dependencies[] = mapbox_bridge
+dependencies[] = views
+
+files[] = views/mapbox_views.views.inc
+files[] = views/handlers/views_handler_area_mapbox_views.inc
