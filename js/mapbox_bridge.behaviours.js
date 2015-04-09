@@ -3,7 +3,7 @@
   Drupal.Mapbox = {};
 
   /**
-   * jQuery UI tabs, Views integration component
+   * Mapbox with very basic setup
    */
   Drupal.behaviors.mapboxBridge = {
     attach: function (context, setting) {

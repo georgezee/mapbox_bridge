@@ -17,9 +17,9 @@ function mapbox_bridge_menu() {
   return $items;
 }
 
-// will call all modules implementing hook_hook_name
-module_invoke_all('hook_name');
-
+/**
+ * Custom function to draw the map
+ * */
 function mapbox_bridge_render_map($map_id, $type) {
 
   // add the necessary js and css files from mapbox
