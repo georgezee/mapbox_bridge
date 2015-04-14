@@ -1,6 +1,52 @@
 <?php
 
 /**
+ * Implements hook_menu().
+ */
+function mapbox_views_menu() {
+  $items['mapbox_views/field_matching/autocomplete'] = array(
+    'page callback' => '_mapbox_views_field_matching_autocomplete',
+    'access arguments' => array('administer views'),
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
+ * Custom Function returning Geofields
+ * */
+function _mapbox_views_field_matching_autocomplete($string) {
+  $matches = array();
+
+  // Some fantasy DB table which holds cities
+  $query = db_select('field_config', 'fc');
+
+  // Select rows that match the string
+  $query
+    ->fields('fc', array('field_name'))
+    ->addExpression("GROUP_CONCAT(fci.bundle ORDER BY fci.bundle asc SEPARATOR ', ')", 'bundle_names');
+
+  $query
+    ->leftJoin('field_config_instance', 'fci', 'fci.field_id = fc.id');
+
+  $query
+    ->condition('fc.type', 'geofield', '=')
+    ->condition('fc.field_name', '%' . db_like($string) . '%', 'LIKE')
+    ->groupBy('fc.field_name');
+
+  $return = $query->execute();
+
+
+  // add matches to $matches
+  foreach ($return as $row) {
+    $matches[$row->field_name] = check_plain($row->field_name . ' (' . $row->bundle_names . ')');
+  }
+
+  // return for JS
+  drupal_json_output($matches);
+}
+
+/**
  * Implements hook_views_api().
  */
 function mapbox_views_views_api() {
@@ -8,4 +54,68 @@ function mapbox_views_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'mapbox_views') . '/views',
   );
+}
+
+/**
+ * Custom function
+ * */
+function mapbox_views_build($mapbox_id, $mapbox_field, $view) {
+
+  $custom_query = $view;
+
+  // no ordering needed
+  $custom_query->query->orderby = NULL;
+
+  // use the provided field_name to get lat, long and data
+  $field_lat = $mapbox_field . '_lat';
+  $field_lon = $mapbox_field . '_lon';
+  $field_data = 'field_data_' . $mapbox_field;
+
+  // add the geofields
+  $custom_query->query->fields[$field_lat] = array(
+    'field' => $field_lat,
+    'table' => $field_data,
+    'alias' => 'lat'
+  );
+
+  $custom_query->query->fields[$field_lon] = array(
+    'field' => $field_lon,
+    'table' => $field_data,
+    'alias' => 'lon'
+  );
+
+  // join the geofield table to the node
+  $join = new views_join();
+  $join->table = $field_data;
+  $join->field = 'entity_id';
+  $join->left_table = 'node';
+  $join->left_field = 'nid';
+  $join->type = 'INNER';
+
+  $custom_query->query->add_relationship($field_data, $join, 'node');
+
+  // this is very important, always return everything and have no offset
+  $custom_query->query->limit = 0;
+  $custom_query->query->offset = 0;
+  $custom_query = $custom_query->query->query();
+
+  // create the query to be used in db_query()
+  if (method_exists($custom_query, 'preExecute')) {
+    $custom_query->preExecute();
+  }
+  $sql = (string) $custom_query;
+  $quoted = array();
+  $connection = Database::getConnection();
+  foreach ((array) $custom_query->arguments() as $key => $val) {
+    $quoted[$key] = $connection->quote($val);
+  }
+
+  // save query
+  $query = strtr($sql, $quoted);
+
+  // collect the data
+  $results = db_query($query)->fetchAll();
+
+  // buid map
+  return mapbox_bridge_render_map($mapbox_id, $results, 'views');
 }

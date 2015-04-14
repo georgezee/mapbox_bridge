@@ -20,22 +20,23 @@ function mapbox_bridge_menu() {
 /**
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $type) {
+function mapbox_bridge_render_map($map_id, $data, $type) {
+  if ($map_id && $data && $type) {
+    // add mapbox.js files
+    drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
+    drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
 
-  // add the necessary js and css files from mapbox
-  drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
-  drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
+    // add $map_id and token to javascript settings
+    drupal_add_js(array('mapboxBridge' => array(
+      'mapId' => $map_id,
+      'data' => json_encode($data),
+      'publicToken' => variable_get('mapbox_bridge_public', NULL)
+    )), 'setting');
 
-  // pass the $map_id and token to the js
-  drupal_add_js(array('mapboxBridge' => array(
-    'mapId' => $map_id,
-    'publicToken' => variable_get('mapbox_bridge_public', NULL)
-  )), 'setting');
+    // add mapbox_bridge.behaviours.js which contains the main logic
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
 
-  // add the internal js file to launch mapbox
-  drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
-
-  // div that will contain the map
-  return '<div class="mapbox-bridge mapbox-type-' . $type . '" id="map" style="width: 100%; height: 600px;"></div>';
-
+    // div that will contain the map
+    return '<div class="mapbox-bridge mapbox-type-' . $type . '" id="map" style="width: 100%; height: 600px;"></div>';
+  }
 }

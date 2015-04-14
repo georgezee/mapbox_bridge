@@ -5,11 +5,13 @@
  *
  * @ingroup views_area_handlers
  */
-class views_handler_area_mapbox_views extends views_handler_area_text {
+class views_handler_area_mapbox_views extends views_handler_area {
 
   function option_definition() {
     $options = parent::option_definition();
-    unset($options['format']);
+    unset($options['label']);
+    $options['mapbox_id'] = array('default' => '');
+    $options['mapbox_field'] = array('default' => '');
     return $options;
   }
 
@@ -17,33 +19,41 @@ class views_handler_area_mapbox_views extends views_handler_area_text {
     parent::options_form($form, $form_state);
 
     $form['label']['#type'] = 'hidden';
-    $form['tokenize']['#type'] = 'hidden';
-    $form['token_help']['#type'] = 'hidden';
 
-    // Alter the form element, to be a regular textfield.
-    $form['content']['#title'] = 'Mapbox ID';
-    $form['content']['#type'] = 'textfield';
-  }
+    $form['mapbox_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Mapbox ID'),
+      '#description' => t('Enter the ID of your Mapbox project: https://www.mapbox.com/projects/'),
+      '#default_value' => $this->options['mapbox_id'],
+    );
 
-  // Empty, so we don't inherit options_submit from the parent.
-  function options_submit(&$form, &$form_state) {
+    $form['mapbox_field'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Mapbox Geofield'),
+      '#description' => t('Geofield which contains the coordinates'),
+      '#default_value' => $this->options['mapbox_field'],
+      '#autocomplete_path' => 'mapbox_views/field_matching/autocomplete',
+    );
+
+    return $form;
   }
 
   function render($empty = FALSE) {
     if (!$empty || !empty($this->options['empty'])) {
-      return $this->render_mapbox($this->options['content']);
+      return $this->render_mapbox($this->options['mapbox_id'], $this->options['mapbox_field']);
     }
 
     return '';
   }
 
   /**
-   * Render a text area with filter_xss_admin.
+   * Render Mapbox
    */
-  function render_mapbox($value) {
-    if ($value) {
-      return mapbox_bridge_render_map($this->sanitize_value($value, 'xss_admin'), 'views');
+  function render_mapbox($mapbox_id, $mapbox_field) {
+    if ($mapbox_id && $mapbox_field) {
+      return mapbox_views_build($mapbox_id, $mapbox_field, $this->view);
     }
-  }
 
+    return '';
+  }
 }
