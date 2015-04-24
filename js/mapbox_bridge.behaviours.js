@@ -36,7 +36,11 @@
     * Add marker to the map
     * */
     addMarker: function(markerData) {
-      L.marker([markerData.lat, markerData.lon]).addTo(Drupal.Mapbox.map);
+      L.marker([markerData.lat, markerData.lon], {
+        icon: L.mapbox.marker.icon({
+          'marker-symbol': markerData.type
+        })
+      }).addTo(Drupal.Mapbox.map);
     }
 
     // end Drupal.behaviors.mapboxBridge

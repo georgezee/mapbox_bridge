@@ -1,0 +1,50 @@
+
+.mapbox-views-mapping-wrapper .fieldset-legend {
+  display: block;
+  border-top: 1px solid lightgray;
+  width: 100%;
+  margin: 0;
+  background: #E0E0E0;
+  padding: 5px 10px;
+  font-weight: bold;
+}
+
+.mapbox-views-mapping-wrapper .fieldset-wrapper {
+  padding: 0;
+}
+
+.mapbox-views-mapping-wrapper .mapping {
+  padding: 20px 10px;
+  clear: both;
+  overflow: hidden;
+}
+
+.mapbox-views-mapping-wrapper .mapping:nth-child(2n+1) {
+  background: #f1f1f1;
+}
+
+.mapbox-views-mapping-wrapper .mapping:last-child {
+  margin: 0;
+  border: none;
+}
+
+.mapbox-views-mapping-wrapper .mapping .form-item {
+  float: left;
+  clear: none;
+  width: 49%;
+}
+
+.mapbox-views-mapping-wrapper .mapping .form-item + .form-item {
+  float: right;
+}
+
+.mapbox-views-mapping-wrapper .mapping input[type="submit"] {
+  clear: both;
+  float: right;
+}
+
+.mapbox-views-mapping-wrapper input[type="submit"].mapbox-views-add-mapping {
+  margin: 25px auto;
+  display: block;
+  width: 90%;
+}

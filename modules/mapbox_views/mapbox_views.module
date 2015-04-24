@@ -4,18 +4,19 @@
  * Implements hook_menu().
  */
 function mapbox_views_menu() {
-  $items['mapbox_views/field_matching/autocomplete'] = array(
+  $items['mapbox_views_field_matching/autocomplete/%'] = array(
     'page callback' => '_mapbox_views_field_matching_autocomplete',
+    'page arguments' => array(2),
     'access arguments' => array('administer views'),
     'type' => MENU_CALLBACK
   );
+
   return $items;
 }
-
 /**
- * Custom Function returning Geofields
+ * Custom Function returning fields of the given $field_type
  * */
-function _mapbox_views_field_matching_autocomplete($string) {
+function _mapbox_views_field_matching_autocomplete($field_type, $string) {
   $matches = array();
 
   // Some fantasy DB table which holds cities
@@ -30,7 +31,7 @@ function _mapbox_views_field_matching_autocomplete($string) {
     ->leftJoin('field_config_instance', 'fci', 'fci.field_id = fc.id');
 
   $query
-    ->condition('fc.type', 'geofield', '=')
+    ->condition('fc.type', $field_type, '=')
     ->condition('fc.field_name', '%' . db_like($string) . '%', 'LIKE')
     ->groupBy('fc.field_name');
 
@@ -59,7 +60,7 @@ function mapbox_views_views_api() {
 /**
  * Custom function
  * */
-function mapbox_views_build($mapbox_id, $mapbox_field, $view) {
+function mapbox_views_build($mapbox_id, $geofield, $mapbox_mapping_field, $marker_types, $view) {
 
   $custom_query = $view;
 
@@ -67,17 +68,18 @@ function mapbox_views_build($mapbox_id, $mapbox_field, $view) {
   $custom_query->query->orderby = NULL;
 
   // use the provided field_name to get lat, long and data
-  $field_lat = $mapbox_field . '_lat';
-  $field_lon = $mapbox_field . '_lon';
-  $field_data = 'field_data_' . $mapbox_field;
+  $field_lat = $geofield . '_lat';
+  $field_lon = $geofield . '_lon';
+  $field_data = 'field_data_' . $geofield;
 
-  // add the geofields
+  // add the latitude
   $custom_query->query->fields[$field_lat] = array(
     'field' => $field_lat,
     'table' => $field_data,
     'alias' => 'lat'
   );
 
+  // add the longitude
   $custom_query->query->fields[$field_lon] = array(
     'field' => $field_lon,
     'table' => $field_data,
@@ -94,6 +96,25 @@ function mapbox_views_build($mapbox_id, $mapbox_field, $view) {
 
   $custom_query->query->add_relationship($field_data, $join, 'node');
 
+  if ($mapbox_mapping_field) {
+    // add the term reference
+    $custom_query->query->fields[$mapbox_mapping_field] = array(
+      'field' => 'field_office_type_tid',
+      'table' => 'field_data_' . $mapbox_mapping_field,
+      'alias' => 'type'
+    );
+
+    // join the term reference table to the node
+    $join = new views_join();
+    $join->table = 'field_data_' . $mapbox_mapping_field;
+    $join->field = 'entity_id';
+    $join->left_table = 'node';
+    $join->left_field = 'nid';
+    $join->type = 'INNER';
+
+    $custom_query->query->add_relationship('field_data_' . $mapbox_mapping_field, $join, 'node');
+  }
+
   // this is very important, always return everything and have no offset
   $custom_query->query->limit = 0;
   $custom_query->query->offset = 0;
@@ -103,6 +124,7 @@ function mapbox_views_build($mapbox_id, $mapbox_field, $view) {
   if (method_exists($custom_query, 'preExecute')) {
     $custom_query->preExecute();
   }
+
   $sql = (string) $custom_query;
   $quoted = array();
   $connection = Database::getConnection();
@@ -116,6 +138,40 @@ function mapbox_views_build($mapbox_id, $mapbox_field, $view) {
   // collect the data
   $results = db_query($query)->fetchAll();
 
+  // map the marker types
+  if ($marker_types) {
+    foreach ($results as &$result) {
+      if (isset($marker_types[$result->type])) {
+        $result->type = $marker_types[$result->type];
+      } else {
+        $result->type = '';
+      }
+    }
+  }
+
   // buid map
   return mapbox_bridge_render_map($mapbox_id, $results, 'views');
+}
+
+/**
+ * Custom submit handler that removes one specific mapping.
+ * */
+function mapbox_views_ajax_remove_mapping($form, &$form_state) {
+  // key of the element that should be removed
+  $key = $form_state['clicked_button']['#name'];
+
+  // remove element and reindex the array so we can count from 0 again
+  unset($form_state['input']['options']['mapping'][$key]);
+  $form_state['input']['options']['mapping'] = array_values($form_state['input']['options']['mapping']);
+
+  // remove one entry from mapping
+  $form_state['view']->mapping--;
+}
+
+/**
+ * Custom submit handler that adds an additional, empty mapping.
+ * */
+function mapbox_views_ajax_add_mapping($form, &$form_state) {
+  die('helo');
+  $form_state['view']->mapping++;
 }
