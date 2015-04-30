@@ -2,7 +2,6 @@
 
 /**
  * Implements hook_views_data().
- *
  */
 function mapbox_views_views_data() {
 
@@ -21,5 +20,4 @@ function mapbox_views_views_data() {
   );
 
   return $data;
-
 }

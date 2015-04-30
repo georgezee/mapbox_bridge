@@ -135,12 +135,9 @@ class views_handler_area_mapbox_views extends views_handler_area {
     return $form;
   }
 
-  /**
-   *
-   */
   function render($empty = FALSE) {
     if (!$empty || !empty($this->options['empty'])) {
-      module_load_include('php', 'mapbox_views', 'MapboxViewsAreaBuilder');
+      module_load_include('php', 'mapbox_views', 'views/mapbox_views_area_builder');
       $mapBuilder = new MapboxViewsAreaBuilder(
         $this->view,
         $this->options['mapbox_id'],
@@ -153,30 +150,9 @@ class views_handler_area_mapbox_views extends views_handler_area {
       catch(Exception $e) {
         watchdog_exception('mapbox_views', $e);
       }
-      //return $this->render_mapbox($this->options['mapbox_id'], $this->options['mapbox_field'], $this->options['mapbox_mapping_field'], $this->options['mapping']);
     }
 
     return '';
   }
 
-//  /**
-//   * Render Mapbox
-//   */
-//  function render_mapbox($mapbox_id, $geofield, $mapbox_mapping_field, $mapping) {
-//    if ($mapbox_id && $geofield && $mapping) {
-//
-//      // map the term names to tids
-//      $marker_types = Array();
-//
-//      foreach ($mapping as $mapped_term) {
-//        if (isset($mapped_term['taxonomy_term'])) {
-//          $marker_types[key(taxonomy_get_term_by_name($mapped_term['taxonomy_term']))] = $mapped_term['marker_type'];
-//        }
-//      }
-//
-//      return mapbox_views_build($mapbox_id, $geofield, $mapbox_mapping_field, $marker_types, $this->view);
-//    }
-//
-//    return '';
-//  }
 }
