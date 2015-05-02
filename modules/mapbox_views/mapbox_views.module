@@ -17,34 +17,28 @@ function mapbox_views_menu() {
  * Custom Function returning fields of the given $field_type
  * */
 function _mapbox_views_field_matching_autocomplete($field_type, $string) {
-  $matches = array();
+  $autocomplete_suggestions = array();
 
-  // Some fantasy DB table which holds cities
+  // Some fantasy DB table which holds field configuration
   $query = db_select('field_config', 'fc');
 
   // Select rows that match the string
-  $query
-    ->fields('fc', array('field_name'))
-    ->addExpression("GROUP_CONCAT(fci.bundle ORDER BY fci.bundle asc SEPARATOR ', ')", 'bundle_names');
+  $query->fields('fc', array('field_name'));
+  $query->condition('fc.type', $field_type, '=');
+  $query->condition('fc.field_name', '%' . db_like($string) . '%', 'LIKE');
+  $query->groupBy('fc.field_name');
 
-  $query
-    ->leftJoin('field_config_instance', 'fci', 'fci.field_id = fc.id');
-
-  $query
-    ->condition('fc.type', $field_type, '=')
-    ->condition('fc.field_name', '%' . db_like($string) . '%', 'LIKE')
-    ->groupBy('fc.field_name');
-
-  $return = $query->execute();
-
+  $query->leftJoin('field_config_instance', 'fci', 'fci.field_id = fc.id');
+  $query->addExpression("GROUP_CONCAT(fci.bundle ORDER BY fci.bundle asc SEPARATOR ', ')", 'bundle_names');
 
   // add matches to $matches
-  foreach ($return as $row) {
-    $matches[$row->field_name] = check_plain($row->field_name . ' (' . $row->bundle_names . ')');
+  $results = $query->execute();
+  foreach ($results as $row) {
+    $autocomplete_suggestions[$row->field_name] = check_plain($row->field_name . ' (' . $row->bundle_names . ')');
   }
 
   // return for JS
-  drupal_json_output($matches);
+  drupal_json_output($autocomplete_suggestions);
 }
 
 /**

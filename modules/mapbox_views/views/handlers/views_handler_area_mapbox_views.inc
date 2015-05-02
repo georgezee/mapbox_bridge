@@ -11,7 +11,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options = parent::option_definition();
     unset($options['label']);
     $options['mapbox_id'] = array('default' => '');
-    $options['mapbox_field'] = array('default' => '');
+    $options['mapbox_geofield'] = array('default' => '');
     $options['mapbox_mapping_field'] = array('default' => '');
     $options['mapping'] = array('default' => '');
     return $options;
@@ -25,19 +25,20 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $form['cache'] = false;
     $form['label']['#type'] = 'hidden';
 
+    $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
     $form['mapbox_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Mapbox ID'),
-      '#description' => t('Enter the ID of your Mapbox project: https://www.mapbox.com/projects/'),
+      '#description' => t('Enter the ID of your Mapbox project: !mapbox', $t_args),
       '#default_value' => $this->options['mapbox_id'],
       '#mandatory' => TRUE
     );
 
-    $form['mapbox_field'] = array(
+    $form['mapbox_geofield'] = array(
       '#type' => 'textfield',
       '#title' => t('Mapbox Geofield'),
-      '#description' => t('Geofield which contains the coordinates'),
-      '#default_value' => $this->options['mapbox_field'],
+      '#description' => t('Geofield which contains markers\' coordinates'),
+      '#default_value' => $this->options['mapbox_geofield'],
       '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/geofield',
       '#mandatory' => TRUE
     );
@@ -141,7 +142,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       $mapBuilder = new MapboxViewsAreaBuilder(
         $this->view,
         $this->options['mapbox_id'],
-        $this->options['mapbox_field'],
+        $this->options['mapbox_geofield'],
         $this->options['mapbox_mapping_field']
       );
       try {
