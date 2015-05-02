@@ -59,8 +59,8 @@ class MapboxViewsAreaBuilder {
    */
   public function getMap($markersTypeRemap = array()) {
     $allViewResults = $this->getAllViewResults();
-    $allEntityIds = $this->extractEntityIdsFromViewResults($allViewResults);
-    $mapPins = $this->extractPinsPositionFromEntities($allEntityIds);
+    $allEntityIds = $this->extractEntityIds($allViewResults);
+    $mapPins = $this->extractPinsPosition($allEntityIds);
     if ($markersTypeRemap !== array()) {
       $this->remapPinTypes($mapPins, $markersTypeRemap);
     }
@@ -120,7 +120,7 @@ class MapboxViewsAreaBuilder {
    * @return array
    *  Node ids
    */
-  private function extractEntityIdsFromViewResults($results) {
+  private function extractEntityIds($results) {
     $nodeIds = array();
 
     foreach($results as $item) {
@@ -148,7 +148,7 @@ class MapboxViewsAreaBuilder {
    *
    * @throws \PDOException
    */
-  private function extractPinsPositionFromEntities($entityIds) {
+  private function extractPinsPosition($entityIds) {
     // Start with geofield data
     $q = db_select("field_data_{$this->geofield}", 'g');
     $q->addField('g', "{$this->geofield}_lat", 'lat');
