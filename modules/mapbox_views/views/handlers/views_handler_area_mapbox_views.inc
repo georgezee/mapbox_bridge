@@ -7,13 +7,21 @@
  */
 class views_handler_area_mapbox_views extends views_handler_area {
 
-  function option_definition() {
+  /**
+   * Handler name in view configuration page
+   *
+   * @return string
+   */
+  public function ui_name($short = false) {
+    return empty($this->options['ui_name']) ? t('Mapbox map') : $this->options['ui_name'];
+  }
+
+  public function option_definition() {
     $options = parent::option_definition();
     unset($options['label']);
     $options['mapbox_id'] = array('default' => '');
-    $options['mapbox_geofield'] = array('default' => '');
-    $options['mapbox_mapping_field'] = array('default' => '');
-    $options['mapping'] = array('default' => '');
+    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => ''));
+    $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => ''));
     return $options;
   }
 
@@ -29,26 +37,51 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $form['mapbox_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Mapbox ID'),
-      '#description' => t('Enter the ID of your Mapbox project: !mapbox', $t_args),
+      '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
       '#default_value' => $this->options['mapbox_id'],
       '#mandatory' => TRUE
     );
 
-    $form['mapbox_geofield'] = array(
+    $form['mapbox_marker'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Marker'),
+      '#description' => t('Fields used to get marker\'s basic information'),
+      //'#collapsible' => TRUE,
+    );
+    $form['mapbox_marker']['geo'] = array(
       '#type' => 'textfield',
-      '#title' => t('Mapbox Geofield'),
-      '#description' => t('Geofield which contains markers\' coordinates'),
-      '#default_value' => $this->options['mapbox_geofield'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/geofield',
+      '#title' => t('Geofield'),
+      '#description' => t('Name of the field which contains coordinates (field type: geofield)'),
+      '#default_value' => $this->options['mapbox_marker']['geo'],
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/geofield/',
       '#mandatory' => TRUE
     );
-
-    $form['mapbox_mapping_field'] = array(
+    $form['mapbox_marker']['type'] = array(
       '#type' => 'textfield',
-      '#title' => t('Term reference field'),
-      '#description' => t('Field containing terms used for mapping.'),
-      '#default_value' => $this->options['mapbox_mapping_field'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term_reference',
+      '#title' => t('Type'),
+      '#description' => t('Field used to determine marker type and symbol (field type: taxonomy term reference)'),
+      '#default_value' => $this->options['mapbox_marker']['type'],
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/taxonomy_term_reference/',
+    );
+
+    $form['mapbox_type'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Symbol'),
+      '#description' => t('Fields used to determine marker\'s type symbol'),
+    );
+    $form['mapbox_type']['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Name'),
+      '#description' => t('Field used to get standard symbol name (e.g.: bus, heart etc) for the marker (field types: text, list_text)'),
+      '#default_value' => $this->options['mapbox_type']['name'],
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text/',
+    );
+    $form['mapbox_type']['icon'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Icon'),
+      '#description' => t('Field used to get custom icon file (field types: image, file)'),
+      '#default_value' => $this->options['mapbox_type']['icon'],
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image,file/',
     );
 
     // Count the existing mappings or reset to 1 when new.
@@ -56,97 +89,22 @@ class views_handler_area_mapbox_views extends views_handler_area {
       $form_state['view']->mapping = count($this->options['mapping']) - 1;
     }
 
-    $form['mapping'] = array(
-      '#title' => t('Marker Mappings'),
-      '#type' => 'fieldset',
-      '#tree' => TRUE,
-      '#collapsible' => FALSE,
-      '#collapsed' => FALSE,
-      '#attributes' => array('class' => array('mapbox-views', 'mapbox-views-mapping-wrapper')),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[mapbox_mapping_field]"]' => array('filled' => TRUE),
-        ),
-      ),
-    );
-
-    if ($form_state['view']->mapping !== false) {
-      for ($i = 0; $i <= $form_state['view']->mapping; $i++) {
-
-        $form['mapping'][$i] = array(
-          '#type' => 'container',
-          '#tree' => TRUE,
-          '#prefix' => '<div id="mapping-' . $i . '" class="mapping">',
-          '#suffix' => '</div>',
-        );
-
-        $form['mapping'][$i]['marker_type'] = array(
-          '#title' => t('Marker Type'),
-          '#type' => 'textfield',
-          '#default_value' => $this->options['mapping'][$i]['marker_type'],
-          '#description' => t('The name of the marker type, Mapbox defaults like "bus, ect." can be used or custom ones which can be defined inside Mapbox Studio.'),
-        );
-
-        $form['mapping'][$i]['taxonomy_term'] = array(
-          '#title' => t('Taxonomy Term'),
-          '#type' => 'textfield',
-          '#autocomplete_path' => 'taxonomy/autocomplete/field_office_type',
-          '#default_value' => $this->options['mapping'][$i]['taxonomy_term'],
-          '#description' => t('Taxonomy term which decides to use the marker type.'),
-        );
-
-        if ($i > 0) {
-          $form['mapping'][$i]['remove_mapping'] = array(
-            '#type' => 'submit',
-            '#value' => t('Remove mapping'),
-            '#name' => $i,
-            '#ajax' => array(
-              'path' => views_ui_build_form_url($form_state),
-            ),
-            '#submit' => array('mapbox_views_ajax_remove_mapping', 'views_ui_config_item_form_submit_temporary'),
-            '#executes_submit_callback' => TRUE,
-          );
-        }
-
-      }
-    }
-
-    $form['mapping']['add_mapping'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add mapping'),
-      '#ajax' => array(
-        'wrapper' => 'mapping',
-        'path' => views_ui_build_form_url($form_state),
-      ),
-      '#attributes' => array('class' => array('mapbox-views-add-mapping')),
-      '#submit' => array('mapbox_views_ajax_add_mapping', 'views_ui_config_item_form_submit_temporary'),
-      '#executes_submit_callback' => TRUE,
-    );
-
-    /*$form['mapping']['add_participant'] = array(
-      '#type' => 'submit',
-      '#value' => t('Add mapping'),
-      '#ajax' => array(
-        'callback' => 'mapbox_views_ajax_add_mapping',
-        'wrapper' => 'mapping',
-      ),
-      '#attributes' => array('class' => array('mapbox-views-add-mapping')),
-    );*/
-
     return $form;
   }
 
   function render($empty = FALSE) {
     if (!$empty || !empty($this->options['empty'])) {
       module_load_include('php', 'mapbox_views', 'views/mapbox_views_area_builder');
-      $mapBuilder = new MapboxViewsAreaBuilder(
-        $this->view,
-        $this->options['mapbox_id'],
-        $this->options['mapbox_geofield'],
-        $this->options['mapbox_mapping_field']
-      );
       try {
-        return $mapBuilder->getMap($this->options['mapping']);
+        $mapBuilder = new MapboxViewsAreaBuilder(
+          $this->view,
+          $this->options['mapbox_id'],
+          $this->options['mapbox_marker']['geo'],
+          $this->options['mapbox_marker']['type'],
+          $this->options['mapbox_type']['name'],
+          $this->options['mapbox_type']['icon']
+        );
+        return $mapBuilder->getMap();
       }
       catch(Exception $e) {
         watchdog_exception('mapbox_views', $e);

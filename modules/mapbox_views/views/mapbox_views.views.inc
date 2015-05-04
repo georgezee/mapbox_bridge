@@ -5,15 +5,15 @@
  */
 function mapbox_views_views_data() {
 
-  $data['mapbox_views']['table']['group'] = t('Global');
+  $data['mapbox_views']['table']['group'] = t('Mapbox');
   $data['mapbox_views']['table']['join'] = array(
     // #global is a special flag which let's a table appear all the time.
     '#global' => array(),
   );
 
   $data['mapbox_views']['mapbox'] = array(
-    'title' => t('Mapbox Views'),
-    'help' => t('Mapbox with equal results but no limit.'),
+    'title' => t('Map with markers'),
+    'help' => t('Displays results as markers on map.'),
     'area' => array(
       'handler' => 'views_handler_area_mapbox_views',
     ),

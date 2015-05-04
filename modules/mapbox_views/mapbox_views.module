@@ -4,9 +4,9 @@
  * Implements hook_menu().
  */
 function mapbox_views_menu() {
-  $items['mapbox_views_field_matching/autocomplete/%'] = array(
+  $items['mapbox_views_field_matching/autocomplete/%/%/%'] = array(
     'page callback' => '_mapbox_views_field_matching_autocomplete',
-    'page arguments' => array(2),
+    'page arguments' => array(2, 3, 4),
     'access arguments' => array('administer views'),
     'type' => MENU_CALLBACK
   );
@@ -14,9 +14,14 @@ function mapbox_views_menu() {
   return $items;
 }
 /**
- * Custom Function returning fields of the given $field_type
- * */
-function _mapbox_views_field_matching_autocomplete($field_type, $string) {
+ * Auto-complete field name page callback: returns a list of fields of a given type
+ * that contains $keyword in their name
+ *
+ * @param string $entity_type
+ * @param string $field_type
+ * @param string $keyword
+ */
+function _mapbox_views_field_matching_autocomplete($entity_type, $field_type, $keyword) {
   $autocomplete_suggestions = array();
 
   // Some fantasy DB table which holds field configuration
@@ -24,11 +29,12 @@ function _mapbox_views_field_matching_autocomplete($field_type, $string) {
 
   // Select rows that match the string
   $query->fields('fc', array('field_name'));
-  $query->condition('fc.type', $field_type, '=');
-  $query->condition('fc.field_name', '%' . db_like($string) . '%', 'LIKE');
+  $query->condition('fc.type', explode(',', $field_type), 'IN');
+  $query->condition('fc.field_name', '%' . db_like($keyword) . '%', 'LIKE');
   $query->groupBy('fc.field_name');
 
   $query->leftJoin('field_config_instance', 'fci', 'fci.field_id = fc.id');
+  $query->condition('fci.entity_type', $entity_type);
   $query->addExpression("GROUP_CONCAT(fci.bundle ORDER BY fci.bundle asc SEPARATOR ', ')", 'bundle_names');
 
   // add matches to $matches
