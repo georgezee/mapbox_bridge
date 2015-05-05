@@ -20,7 +20,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options = parent::option_definition();
     unset($options['label']);
     $options['mapbox_id'] = array('default' => '');
-    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => ''));
+    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => '', 'legend' => ''));
     $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => ''));
     return $options;
   }
@@ -63,6 +63,13 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#default_value' => $this->options['mapbox_marker']['type'],
       '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/taxonomy_term_reference/',
     );
+    $form['mapbox_marker']['legend'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Mapbox Legend'),
+      '#description' => t('Will show a legend below the map with all marker type'),
+      '#default_value' => $this->options['mapbox_marker']['legend'],
+      '#mandatory' => TRUE
+    );
 
     $form['mapbox_type'] = array(
       '#type' => 'fieldset',
@@ -101,6 +108,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['mapbox_id'],
           $this->options['mapbox_marker']['geo'],
           $this->options['mapbox_marker']['type'],
+          $this->options['mapbox_marker']['legend'],
           $this->options['mapbox_type']['name'],
           $this->options['mapbox_type']['icon']
         );

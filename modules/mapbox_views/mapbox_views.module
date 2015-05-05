@@ -24,7 +24,7 @@ function mapbox_views_menu() {
 function _mapbox_views_field_matching_autocomplete($entity_type, $field_type, $keyword) {
   $autocomplete_suggestions = array();
 
-  // Some fantasy DB table which holds field configuration
+  // DB table which holds field configuration
   $query = db_select('field_config', 'fc');
 
   // Select rows that match the string

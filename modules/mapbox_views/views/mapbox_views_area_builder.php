@@ -55,11 +55,12 @@ class MapboxViewsAreaBuilder {
    * @param string $symbolIcon
    *  Field name used to upload custom icons
    */
-  public function __construct(view $view, $mapboxId, $geofield, $markerTypeField = '', $symbolName = '', $symbolIcon = '') {
+  public function __construct(view $view, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '') {
     $this->view = $view;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
     $this->markerTypeField = $markerTypeField;
+    $this->legend = $legend;
     $this->fieldSymbolIcon = $symbolIcon;
     $this->fieldSymbolName = $symbolName;
   }
@@ -77,7 +78,7 @@ class MapboxViewsAreaBuilder {
     $allEntityIds = $this->extractEntityIds($allViewResults);
     $mapMarkers = $this->extractMarkersInfo($allEntityIds);
     $mapMarkers = $this->processMarkersSymbol($mapMarkers);
-    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, 'views');
+    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, 'views', $this->legend);
   }
 
   /**
@@ -190,6 +191,9 @@ class MapboxViewsAreaBuilder {
         $q->leftJoin("file_managed", "fm", "fm.fid = fsi.{$this->fieldSymbolIcon}_fid");
         $q->addField("fm", "uri", "icon");
       }
+
+      $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_tid");
+      $q->addField('ttd', 'name', 'name');
     }
     else {
       $q->addExpression('NULL', 'type');
@@ -203,7 +207,6 @@ class MapboxViewsAreaBuilder {
       if (!isset($marker->type)) {
         $marker->type = '';
       }
-
       $marker->icon = isset($marker->icon) ? file_create_url($marker->icon) : '';
     }
     return $markers;
