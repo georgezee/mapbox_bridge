@@ -42,64 +42,65 @@
     * Add marker to the map
     * */
     addMarker: function(markerData) {
+
+      // for custom icons provided by drupal
       if (markerData.icon) {
-
-        // if the icon hasnt been made yet, we create and save it into the global variable.
-        if (typeof Drupal.Mapbox.icons[markerData.icon] == 'undefined') {
-
-          Drupal.Mapbox.icons[markerData.icon] = {
+        if (typeof Drupal.Mapbox.icons[markerData.name] == 'undefined') {
+          Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
-            icon: markerData.icon
+            iconUrl: markerData.icon
           };
+        }
 
-          if (typeof Drupal.Mapbox.icons[markerData.icon]['marker'] == 'undefined') {
-            // load image to get its size
-            $('<img/>').attr('src', markerData.icon).load(function(){
+        if (typeof Drupal.Mapbox.icons[markerData.name]['marker'] == 'undefined') {
+          // load image to get its size
+          $('<img/>').attr('src', markerData.icon).load(function(){
 
-              // create leaflet marker and save it
-              Drupal.Mapbox.icons[markerData.icon]['marker'] = L.icon({
-                'iconUrl': markerData.icon,
-                'iconSize': [this.width, this.height],
-                'iconAnchor': [0, 0],
-                'popupAnchor': [0, -this.height],
-                'className': 'custom-marker'
-              });
-
-              L.marker([markerData.lat, markerData.lon], {
-                icon: Drupal.Mapbox.icons[markerData.icon]['marker']
-              }).addTo(Drupal.Mapbox.map);
+            // create leaflet marker and save it
+            Drupal.Mapbox.icons[markerData.name]['marker'] = L.icon({
+              'iconUrl': markerData.icon,
+              'iconSize': [this.width, this.height],
+              'iconAnchor': [0, 0],
+              'popupAnchor': [0, -this.height],
+              'className': 'custom-marker'
             });
-          } else {
 
-            // set the marker with the custom icon
             L.marker([markerData.lat, markerData.lon], {
-              icon: Drupal.Mapbox.icons[markerData.icon]['marker']
+              icon: Drupal.Mapbox.icons[markerData.name]['marker']
             }).addTo(Drupal.Mapbox.map);
-          }
 
-
-        } else if (typeof Drupal.Mapbox.icons[markerData.icon]['marker'] != 'undefined') {
+          });
+        } else {
 
           // set the marker with the custom icon
           L.marker([markerData.lat, markerData.lon], {
-            icon: Drupal.Mapbox.icons[markerData.icon]['marker']
+            icon: Drupal.Mapbox.icons[markerData.name]['marker']
           }).addTo(Drupal.Mapbox.map);
+
         }
 
+      // for icons based on mapbox
       } else if (markerData.type) {
+
+        var icon = L.mapbox.marker.icon({
+          'marker-symbol': markerData.type
+        });
+
+        if (typeof Drupal.Mapbox.icons[markerData.name] == 'undefined') {
+          Drupal.Mapbox.icons[markerData.name] = {
+            name: markerData.name,
+            iconUrl: icon.options.iconUrl
+          };
+        }
 
         // set the marker using the mapbox icons
         L.marker([markerData.lat, markerData.lon], {
-          icon: L.mapbox.marker.icon({
-            'marker-symbol': markerData.type
-          })
+          icon: icon
         }).addTo(Drupal.Mapbox.map);
 
+      // fallback for when nothing is provided.
       } else {
-
-        // this is the fallback which uses the default mapbox marker without an icon
         L.marker([markerData.lat, markerData.lon]).addTo(Drupal.Mapbox.map);
-
       }
 
     },
@@ -109,15 +110,15 @@
     * Add a container with all the used markers
     * */
     addLegend: function(setting) {
-      console.log(Drupal.Mapbox.icons);
+
       // add legend container
       $('<div id="mapbox-legend" class="mapbox-legend"><ul class="legends"></ul></div>').insertAfter('#map');
 
       // loop through the stored icons
       $.each(Drupal.Mapbox.icons, function(i, legend){
-        if (legend.icon && legend.name) {
+        if (legend.iconUrl && legend.name) {
           $('<li class="legend">' +
-            '<div class="legend-icon"><img src="' + legend.icon + '"></div>' +
+            '<div class="legend-icon"><img src="' + legend.iconUrl + '"></div>' +
             '<div class="legend-name">' + legend.name + '</div>' +
           '</li>').appendTo('.mapbox-legend .legends');
         }
