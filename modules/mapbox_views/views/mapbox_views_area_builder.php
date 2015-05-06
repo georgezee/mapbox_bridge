@@ -179,7 +179,7 @@ class MapboxViewsAreaBuilder {
       //$q->leftJoin('taxonomy_term_data', 'td', 'td.tid = m.' . "{$this->markerTypeField}_tid");
 
       if ($this->fieldSymbolName) {
-        $q->leftJoin("field_data_{$this->fieldSymbolName}", "fsn", "fsn.entity_type = 'taxonomy_term' AND fsn.entity_id = m.{$this->markerTypeField}_tid");
+        $q->leftJoin("field_data_{$this->fieldSymbolName}", "fsn", "fsn.entity_type = 'taxonomy_term' AND fsn.entity_id = m.{$this->markerTypeField}_target_id");
         $q->addField('fsn', "{$this->fieldSymbolName}_value", 'type');
       }
       else {
@@ -187,12 +187,12 @@ class MapboxViewsAreaBuilder {
       }
 
       if ($this->fieldSymbolIcon) {
-        $q->leftJoin("field_data_{$this->fieldSymbolIcon}", "fsi", "fsi.entity_type = 'taxonomy_term' AND fsi.entity_id = m.{$this->markerTypeField}_tid");
+        $q->leftJoin("field_data_{$this->fieldSymbolIcon}", "fsi", "fsi.entity_type = 'taxonomy_term' AND fsi.entity_id = m.{$this->markerTypeField}_target_id");
         $q->leftJoin("file_managed", "fm", "fm.fid = fsi.{$this->fieldSymbolIcon}_fid");
         $q->addField("fm", "uri", "icon");
       }
 
-      $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_tid");
+      $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_target_id");
       $q->addField('ttd', 'name', 'name');
     }
     else {
