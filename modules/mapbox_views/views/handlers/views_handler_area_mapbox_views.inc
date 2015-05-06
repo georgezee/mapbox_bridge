@@ -61,7 +61,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Type'),
       '#description' => t('Field used to determine marker type and symbol (field type: taxonomy term reference)'),
       '#default_value' => $this->options['mapbox_marker']['type'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/taxonomy_term_reference/',
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/entityreference/',
     );
     $form['mapbox_marker']['legend'] = array(
       '#type' => 'checkbox',
