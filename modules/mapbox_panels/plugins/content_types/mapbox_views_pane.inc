@@ -44,18 +44,22 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
     $view->set_display($view_attributes[1]);
 
     // create the mapbox
-    $mapBuilder = new MapboxViewsAreaBuilder(
-      $view,
-      $conf['mapbox_id'],
-      $conf['geo'],
-      $conf['type'],
-      $conf['legend'],
-      $conf['name'],
-      $conf['icon']
-    );
+    if (!empty($view->result)) {
+      $mapBuilder = new MapboxViewsAreaBuilder(
+        $view,
+        $conf['mapbox_id'],
+        $conf['geo'],
+        $conf['type'],
+        $conf['legend'],
+        $conf['name'],
+        $conf['icon']
+      );
 
-    // save to block content
-    $block->content = $mapBuilder->getMap();
+      // save to block content
+      $block->content = $mapBuilder->getMap();
+    } else {
+      $block->title = FALSE;
+    }
   }
   catch(Exception $e) {
     watchdog_exception('mapbox_views', $e);
