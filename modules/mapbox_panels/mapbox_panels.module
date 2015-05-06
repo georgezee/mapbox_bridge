@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ *  This module implements a content pane that can display a disqus chat.
+ */
+
+function mapbox_panels_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && !empty($plugin)) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function mapbox_panels_menu() {
+  $items['mapbox_panels_views/autocomplete/%'] = array(
+    'page callback' => '_mapbox_panels_views_autocomplete',
+    'page arguments' => array(2),
+    'access arguments' => array('administer views'),
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+/**
+ * Auto-complete field views callback: returns a list of views
+ * that contains $keyword in their name
+ *
+ * @param string $keyword
+ */
+function _mapbox_panels_views_autocomplete($keyword) {
+  $autocomplete_suggestions = array();
+
+  // DB table which holds field configuration
+  $query = db_select('views_view', 'vv');
+
+  $query->fields('vv', array('human_name', 'name'));
+
+  $query->leftJoin('views_display', 'vd', 'vd.vid = vv.vid');
+  $query->fields('vd', array('id', 'display_title'));
+
+  // Select rows that match the string
+  $query->condition('vd.display_title', '%' . db_like($keyword) . '%', 'LIKE');
+
+  $query->addExpression("concat(vv.human_name, ' (', vd.display_title, ')')", 'view_name');
+
+  // add matches to $matches
+  $results = $query->execute();
+  foreach ($results as $row) {
+    $autocomplete_suggestions[$row->name . '__' . $row->id] = check_plain($row->view_name);
+  }
+
+  // return for JS
+  drupal_json_output($autocomplete_suggestions);
+}

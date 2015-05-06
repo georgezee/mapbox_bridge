@@ -20,8 +20,8 @@ function mapbox_bridge_menu() {
 /**
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $data, $type, $legend) {
-  if ($map_id && $data && $type) {
+function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE) {
+  if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
     drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
@@ -29,7 +29,7 @@ function mapbox_bridge_render_map($map_id, $data, $type, $legend) {
     // add $map_id and token to javascript settings
     drupal_add_js(array('mapboxBridge' => array(
       'mapId' => $map_id,
-      'data' => json_encode($data),
+      'data' => $data ? json_encode($data) : FALSE,
       'publicToken' => variable_get('mapbox_bridge_public', NULL),
       'legend' => $legend
     )), 'setting');

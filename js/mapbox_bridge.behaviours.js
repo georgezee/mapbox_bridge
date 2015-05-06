@@ -19,7 +19,7 @@
 
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
-            if (typeof setting.mapboxBridge.data != 'undefined') {
+            if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
               var data = $.parseJSON(setting.mapboxBridge.data);
 
               // add markers

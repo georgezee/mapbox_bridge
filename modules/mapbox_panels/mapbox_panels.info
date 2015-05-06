@@ -1,7 +1,8 @@
-name = Mapbox for panel panes
+name = Mapbox for panels
 description = Use Mapbox inside panels
 core = 7.x
 package = Mapbox
 
 dependencies[] = mapbox_bridge
+dependencies[] = mapbox_views
 dependencies[] = panels
