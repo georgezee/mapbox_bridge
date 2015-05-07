@@ -42,6 +42,7 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
     // get the view object
     $view = views_get_view($view_attributes[0]);
     $view->set_display($view_attributes[1]);
+    $view->execute();
 
     // create the mapbox
     if (!empty($view->result)) {
