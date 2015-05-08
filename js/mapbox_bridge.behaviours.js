@@ -16,6 +16,7 @@
 
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = L.mapbox.map('map', setting.mapboxBridge.mapId);
+          Drupal.Mapbox.map.scrollWheelZoom.disable();
 
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
