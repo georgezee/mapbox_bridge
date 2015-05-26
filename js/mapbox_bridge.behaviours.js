@@ -2,6 +2,8 @@
 
   Drupal.Mapbox = {};
   Drupal.Mapbox.icons = {};
+  Drupal.Mapbox.layers = {};
+  Drupal.Mapbox.featureGroup;
 
   /**
    * Mapbox with very basic setup
@@ -18,6 +20,9 @@
           Drupal.Mapbox.map = L.mapbox.map('map', setting.mapboxBridge.mapId);
           Drupal.Mapbox.map.scrollWheelZoom.disable();
 
+          // create feature group that will contain all the layers
+          Drupal.Mapbox.featureGroup = L.featureGroup().addTo(Drupal.Mapbox.map);
+
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
             if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
@@ -27,6 +32,9 @@
               $.each(data, function(index, markerData){
                 Drupal.behaviors.mapboxBridge.addMarker(markerData);
               });
+
+              // set the pan & zoom of them map to show all visible markers.
+              Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureGroup.getBounds(), { maxZoom: 12 });
 
               // add the legend if necessary
               if (setting.mapboxBridge.legend) {
@@ -46,69 +54,59 @@
 
       // for custom icons provided by drupal
       if (markerData.icon) {
-        if (typeof Drupal.Mapbox.icons[markerData.name] == 'undefined') {
+        if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
+
+          // create an icon
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
-            iconUrl: markerData.icon
-          };
-        }
-
-        if (typeof Drupal.Mapbox.icons[markerData.name]['marker'] == 'undefined') {
-          // load image to get its size
-          $('<img/>').attr('src', markerData.icon).load(function(){
-
-            // create leaflet marker and save it
-            Drupal.Mapbox.icons[markerData.name]['marker'] = L.icon({
+            iconUrl: markerData.icon,
+            marker: L.icon({
               'iconUrl': markerData.icon,
-              'iconSize': [this.width, this.height],
+              'iconSize': [markerData.iconWidth, markerData.iconHeight],
               'iconAnchor': [0, 0],
               'popupAnchor': [0, -this.height],
               'className': 'custom-marker'
-            });
+            })
+          };
 
-            L.marker([markerData.lat, markerData.lon], {
-              icon: Drupal.Mapbox.icons[markerData.name]['marker']
-            }).addTo(Drupal.Mapbox.map);
-
-          });
-        } else {
-
-          // set the marker with the custom icon
-          L.marker([markerData.lat, markerData.lon], {
-            icon: Drupal.Mapbox.icons[markerData.name]['marker']
-          }).addTo(Drupal.Mapbox.map);
-
+          // setup a new layer, one layer per type
+          Drupal.Mapbox.layers[markerData.name] = L.featureGroup().addTo(Drupal.Mapbox.featureGroup);
         }
 
       // for icons based on mapbox
       } else if (markerData.type) {
 
-        var icon = L.mapbox.marker.icon({
-          'marker-symbol': markerData.type
-        });
-
-        if (typeof Drupal.Mapbox.icons[markerData.name] == 'undefined') {
+        if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
-            iconUrl: icon.options.iconUrl
+            iconUrl: icon.options.iconUrl,
+            marker: L.mapbox.marker.icon({
+              'marker-symbol': markerData.type
+            })
           };
+
+          // setup a new layer, one layer per type
+          Drupal.Mapbox.layers[markerData.name] = L.featureGroup().addTo(Drupal.Mapbox.featureGroup);
         }
+      }
 
-        // set the marker using the mapbox icons
+      if (markerData.lat && markerData.lon && typeof Drupal.Mapbox.icons[markerData.name]['marker'] != 'undefined') {
+        // set the marker with the custom icon
         L.marker([markerData.lat, markerData.lon], {
-          icon: icon
-        }).addTo(Drupal.Mapbox.map);
+          icon: Drupal.Mapbox.icons[markerData.name]['marker']
+        }).addTo(Drupal.Mapbox.layers[markerData.name]);
 
-      // fallback for when nothing is provided.
-      } else {
-        L.marker([markerData.lat, markerData.lon]).addTo(Drupal.Mapbox.map);
+      } else if (markerData.lat && markerData.lon) {
+        // fallback for when nothing is provided.
+        L.marker([markerData.lat, markerData.lon]).addTo(Drupal.Mapbox.layers[markerData.name]);
+
       }
 
     },
     // end Drupal.behaviors.mapboxBridge
 
     /*
-    * Add a container with all the used markers
+    * Add a legend container with all the used markers
     * */
     addLegend: function(setting) {
 

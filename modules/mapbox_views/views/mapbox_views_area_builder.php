@@ -208,6 +208,11 @@ class MapboxViewsAreaBuilder {
         $marker->type = '';
       }
       $marker->icon = isset($marker->icon) ? file_create_url($marker->icon) : '';
+
+      // get image size
+      $imagesize = getimagesize($marker->icon);
+      $marker->iconWidth = $imagesize[0]; // width
+      $marker->iconHeight = $imagesize[1]; // height
     }
     return $markers;
   }
