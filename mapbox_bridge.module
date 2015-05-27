@@ -20,7 +20,7 @@ function mapbox_bridge_menu() {
 /**
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE) {
+function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE, $max_zoom = 12) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
@@ -31,7 +31,8 @@ function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE
       'mapId' => $map_id,
       'data' => $data ? json_encode($data) : FALSE,
       'publicToken' => variable_get('mapbox_bridge_public', NULL),
-      'legend' => $legend
+      'legend' => $legend,
+      'maxZoom' => $max_zoom
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic

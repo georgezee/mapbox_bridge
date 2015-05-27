@@ -1,13 +1,13 @@
 <?php
 
 
-class MapboxViewsAreaBuilder {
+class MapboxAreaBuilder {
 
   /**
    * @var view
    *  View object
    */
-  private $view = null;
+  private $object = null;
 
   /**
    * @var string
@@ -42,8 +42,8 @@ class MapboxViewsAreaBuilder {
   /**
    * Class constructor
    *
-   * @param view $view
-   *  View object
+   * @param $object
+   *  View or Node object
    * @param string $mapboxId
    *  Map Id
    * @param string $geofield
@@ -55,14 +55,15 @@ class MapboxViewsAreaBuilder {
    * @param string $symbolIcon
    *  Field name used to upload custom icons
    */
-  public function __construct(view $view, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '') {
-    $this->view = $view;
+  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12) {
+    $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
     $this->markerTypeField = $markerTypeField;
     $this->legend = $legend;
     $this->fieldSymbolIcon = $symbolIcon;
     $this->fieldSymbolName = $symbolName;
+    $this->max_zoom = $max_zoom;
   }
 
   /**
@@ -74,11 +75,19 @@ class MapboxViewsAreaBuilder {
    * @throws \PDOException
    */
   public function getMap() {
-    $allViewResults = $this->getAllViewResults();
-    $allEntityIds = $this->extractEntityIds($allViewResults);
+    if (!isset($this->object->nid)) {
+      $allViewResults = $this->getAllViewResults();
+      $allEntityIds = $this->extractEntityIds($allViewResults);
+      $type = 'views';
+    } else {
+      $allEntityIds = [$this->object->nid];
+      $type = 'node';
+    }
+
     $mapMarkers = $this->extractMarkersInfo($allEntityIds);
     $mapMarkers = $this->processMarkersSymbol($mapMarkers);
-    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, 'views', $this->legend);
+
+    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom);
   }
 
   /**
@@ -89,15 +98,15 @@ class MapboxViewsAreaBuilder {
    * @throws \Exception
    */
   private function getAllViewResults() {
-    $tempView = views_get_view($this->view->name, TRUE);
+    $tempView = views_get_view($this->object->name, TRUE);
     if (is_object($tempView)) {
       // Change pager settings to return all values
-      $this->removeViewPaginationSettings($tempView, $this->view->current_display);
+      $this->removeViewPaginationSettings($tempView, $this->object->current_display);
 
       // @todo: remove sort and useless fields
 
-      $tempView->set_arguments($this->view->args);
-      $tempView->set_display($this->view->current_display);
+      $tempView->set_arguments($this->object->args);
+      $tempView->set_display($this->object->current_display);
       $tempView->live_preview = TRUE; // Disables some caches
       $tempView->pre_execute();
       $tempView->execute();

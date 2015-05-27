@@ -34,7 +34,7 @@
               });
 
               // set the pan & zoom of them map to show all visible markers.
-              Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureGroup.getBounds(), { maxZoom: 12 });
+              Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureGroup.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
 
               // add the legend if necessary
               if (setting.mapboxBridge.legend) {

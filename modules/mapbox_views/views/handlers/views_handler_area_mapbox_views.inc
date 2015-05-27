@@ -22,6 +22,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options['mapbox_id'] = array('default' => '');
     $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => '', 'legend' => ''));
     $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => ''));
+    $options['mapbox_max_zoom'] = array('default' => 12);
     return $options;
   }
 
@@ -39,6 +40,33 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Mapbox ID'),
       '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
       '#default_value' => $this->options['mapbox_id'],
+      '#mandatory' => TRUE
+    );
+    $form['mapbox_max_zoom'] = array(
+      '#type' => 'select',
+      '#title' => t('Max zoom level'),
+      '#description' => t('The maximum level of zoom (the higher the level, the closer)'),
+      '#default_value' => $this->options['mapbox_max_zoom'] ? $this->options['mapbox_max_zoom'] : 12,
+      '#options' => array(
+        1 => 1,
+        2 => 2,
+        3 => 3,
+        4 => 4,
+        5 => 5,
+        6 => 6,
+        7 => 7,
+        8 => 8,
+        9 => 9,
+        10 => 10,
+        11 => 11,
+        12 => 12,
+        13 => 13,
+        14 => 14,
+        15 => 15,
+        16 => 16,
+        17 => 17,
+        18 => 18,
+      ),
       '#mandatory' => TRUE
     );
 
@@ -101,16 +129,17 @@ class views_handler_area_mapbox_views extends views_handler_area {
 
   function render($empty = FALSE) {
     if (!$empty || !empty($this->options['empty'])) {
-      module_load_include('php', 'mapbox_views', 'views/mapbox_views_area_builder');
+      module_load_include('php', 'mapbox_bridge', 'inc/mapbox_area_builder');
       try {
-        $mapBuilder = new MapboxViewsAreaBuilder(
+        $mapBuilder = new MapboxAreaBuilder(
           $this->view,
           $this->options['mapbox_id'],
           $this->options['mapbox_marker']['geo'],
           $this->options['mapbox_marker']['type'],
           $this->options['mapbox_marker']['legend'],
           $this->options['mapbox_type']['name'],
-          $this->options['mapbox_type']['icon']
+          $this->options['mapbox_type']['icon'],
+          $this->options['mapbox_max_zoom']
         );
         return $mapBuilder->getMap();
       }

@@ -34,7 +34,7 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
   }
 
   // block content
-  module_load_include('php', 'mapbox_views', 'views/mapbox_views_area_builder');
+  module_load_include('php', 'mapbox_bridge', 'inc/mapbox_area_builder');
   try {
     // first value is the view_id, the second is the display_id
     $view_attributes = explode('__', $conf['mapbox_view']);
@@ -46,14 +46,15 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
 
     // create the mapbox
     if (!empty($view->result)) {
-      $mapBuilder = new MapboxViewsAreaBuilder(
+      $mapBuilder = new MapboxAreaBuilder(
         $view,
         $conf['mapbox_id'],
         $conf['geo'],
         $conf['type'],
         $conf['legend'],
         $conf['name'],
-        $conf['icon']
+        $conf['icon'],
+        $conf['mapbox_max_zoom']
       );
 
       // save to block content
@@ -90,6 +91,33 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('View containing the data for Mapbox'),
     '#default_value' => $conf['mapbox_view'],
     '#autocomplete_path' => 'mapbox_panels_views/autocomplete/',
+    '#mandatory' => TRUE
+  );
+  $form['mapbox_max_zoom'] = array(
+    '#type' => 'select',
+    '#title' => t('Max zoom level'),
+    '#description' => t('The maximum level of zoom (the higher the level, the closer)'),
+    '#default_value' => $conf['mapbox_max_zoom'] ? $conf['mapbox_max_zoom'] : 12,
+    '#options' => array(
+      1 => 1,
+      2 => 2,
+      3 => 3,
+      4 => 4,
+      5 => 5,
+      6 => 6,
+      7 => 7,
+      8 => 8,
+      9 => 9,
+      10 => 10,
+      11 => 11,
+      12 => 12,
+      13 => 13,
+      14 => 14,
+      15 => 15,
+      16 => 16,
+      17 => 17,
+      18 => 18,
+    ),
     '#mandatory' => TRUE
   );
 
