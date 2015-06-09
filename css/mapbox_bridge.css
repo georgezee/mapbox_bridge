@@ -1,0 +1,5 @@
+
+/* Inherit cursor by default for custom markers */
+.custom-marker {
+  cursor: inherit;
+}

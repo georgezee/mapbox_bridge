@@ -38,6 +38,9 @@ function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE
     // add mapbox_bridge.behaviours.js which contains the main logic
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
 
+    // add mapbox_bridge.css for basic style overrides to mapbox
+    drupal_add_css(drupal_get_path('module', 'mapbox_bridge') . '/css/mapbox_bridge.css', array('group' => CSS_DEFAULT));
+
     // div that will contain the map
     return '<div class="mapbox-bridge mapbox-type-' . $type . '" id="map" style="width: 100%; height: 600px;"></div>';
   }
