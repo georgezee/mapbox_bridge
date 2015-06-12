@@ -169,7 +169,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['mapbox_type']['name'],
           $this->options['mapbox_type']['icon'],
           $this->options['mapbox_max_zoom'],
-          array('enabled' => $this->options['popup'], 'popup_viewmode' => $this->options['popup_viewmode'])
+          array('enabled' => $this->options['mapbox_marker']['popup_settings']['popup'], 'popup_viewmode' => $this->options['mapbox_marker']['popup_settings']['popup_viewmode'])
         );
         return $mapBuilder->getMap();
       }
