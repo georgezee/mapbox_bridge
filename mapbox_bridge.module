@@ -14,7 +14,7 @@ function mapbox_bridge_menu() {
     'file' => 'mapbox_bridge.admin.inc',
   );
 
-  $items['mapbox_bridge_ajax_content/%viewmode/%nid'] = array (
+  $items['mapbox_bridge_ajax_content'] = array (
     'page callback' => 'mapbox_bridge_ajax_content',
     'page arguments' => array(1, 2),
     'access arguments' => array('access content'),
