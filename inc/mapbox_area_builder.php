@@ -55,7 +55,7 @@ class MapboxAreaBuilder {
    * @param string $symbolIcon
    *  Field name used to upload custom icons
    */
-  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12) {
+  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = FALSE) {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
@@ -64,6 +64,7 @@ class MapboxAreaBuilder {
     $this->fieldSymbolIcon = $symbolIcon;
     $this->fieldSymbolName = $symbolName;
     $this->max_zoom = $max_zoom;
+    $this->popup = $popup;
   }
 
   /**
@@ -87,7 +88,7 @@ class MapboxAreaBuilder {
     $mapMarkers = $this->extractMarkersInfo($allEntityIds);
     $mapMarkers = $this->processMarkersSymbol($mapMarkers);
 
-    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom);
+    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup);
   }
 
   /**

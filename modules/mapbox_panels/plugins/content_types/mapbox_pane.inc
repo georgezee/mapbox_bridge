@@ -48,7 +48,8 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         FALSE,
         $conf['name'],
         $conf['icon'],
-        $conf['mapbox_max_zoom']
+        $conf['mapbox_max_zoom'],
+        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode'])
       );
 
       // save to block content
@@ -77,6 +78,16 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
  * Settings form for pane
  * */
 function mapbox_pane_content_type_edit_form($form, &$form_state) {
+
+  // prepare a list of viewmodes
+  $view_modes = variable_get('entity_view_modes', array());
+  $options = array();
+
+  foreach ($view_modes as $type => $view_mode) {
+    foreach ($view_mode as $key => $mode) {
+      $options[$type][$key] = $mode['label'];
+    }
+  }
 
   $conf = $form_state['conf'];
 
@@ -136,6 +147,24 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to determine marker type and symbol (field type: taxonomy term reference)'),
     '#default_value' => $conf['type'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/entityreference/',
+  );
+  $form['mapbox_marker']['popup'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Popup'),
+    '#description' => t('Show a popup when clicking the marker'),
+    '#default_value' => $conf['popup'],
+  );
+  $form['mapbox_marker']['popup_viewmode'] = array(
+    '#type' => 'select',
+    '#title' => t('Viewmode'),
+    '#options' => $options,
+    '#description' => t('Viewmode to be used when displaying the popup'),
+    '#default_value' => $conf['popup_viewmode'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="popup"]' => array('checked' => FALSE),
+      ),
+    ),
   );
   $form['mapbox_type'] = array(
     '#type' => 'fieldset',

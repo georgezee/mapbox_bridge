@@ -14,13 +14,31 @@ function mapbox_bridge_menu() {
     'file' => 'mapbox_bridge.admin.inc',
   );
 
+  $items['mapbox_bridge_ajax_content/%viewmode/%nid'] = array (
+    'page callback' => 'mapbox_bridge_ajax_content',
+    'page arguments' => array(1, 2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+
   return $items;
+}
+
+/**
+ * Custom function to load content
+ * */
+function mapbox_bridge_ajax_content($viewmode, $nid) {
+  $node = entity_load_single('node', $nid);
+  $rendered = entity_view('node', array($node), $viewmode);
+
+  // dont "return" it or otherwise it will display the whole page
+  print render($rendered);
 }
 
 /**
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE, $max_zoom = 12) {
+function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE, $max_zoom = 12, $popup = FALSE) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
@@ -32,10 +50,12 @@ function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE
       'data' => $data ? json_encode($data) : FALSE,
       'publicToken' => variable_get('mapbox_bridge_public', NULL),
       'legend' => $legend,
-      'maxZoom' => $max_zoom
+      'maxZoom' => $max_zoom,
+      'popup' => $popup
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.popup.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
 
     // add mapbox_bridge.css for basic style overrides to mapbox

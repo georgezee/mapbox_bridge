@@ -30,7 +30,7 @@
 
               // add markers
               $.each(data, function(index, markerData){
-                Drupal.behaviors.mapboxBridge.addMarker(markerData);
+                Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
               });
 
               // set the pan & zoom of them map to show all visible markers.
@@ -40,17 +40,23 @@
               if (setting.mapboxBridge.legend) {
                 Drupal.behaviors.mapboxBridge.addLegend(setting, data);
               }
+
+              // create the popups
+              if (setting.mapboxBridge.popup.enabled) {
+                Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode);
+              }
             }
           });
 
         });
       }
     },
+    // end Drupal.behaviors.attach
 
     /**
     * Add marker to the map
     * */
-    addMarker: function(markerData) {
+    addMarker: function(markerData, setting) {
 
       // for custom icons provided by drupal
       if (markerData.icon) {
@@ -63,9 +69,9 @@
             marker: L.icon({
               'iconUrl': markerData.icon,
               'iconSize': [markerData.iconWidth, markerData.iconHeight],
-              'iconAnchor': [0, 0],
-              'popupAnchor': [0, -this.height],
-              'className': 'custom-marker'
+              'iconAnchor': [markerData.iconWidth / 2, markerData.iconHeight],
+              'popupAnchor': [0, -(markerData.iconHeight+3)],
+              'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
             })
           };
 
@@ -79,7 +85,6 @@
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
-            iconUrl: icon.options.iconUrl,
             marker: L.mapbox.marker.icon({
               'marker-symbol': markerData.type
             })
@@ -91,19 +96,16 @@
       }
 
       if (markerData.lat && markerData.lon && typeof Drupal.Mapbox.icons[markerData.name]['marker'] != 'undefined') {
+
         // set the marker with the custom icon
         L.marker([markerData.lat, markerData.lon], {
-          icon: Drupal.Mapbox.icons[markerData.name]['marker']
+          icon: Drupal.Mapbox.icons[markerData.name]['marker'],
+          clickable: (setting.popup.enabled ? true : false),
+          nid: markerData.nid
         }).addTo(Drupal.Mapbox.layers[markerData.name]);
-
-      } else if (markerData.lat && markerData.lon) {
-        // fallback for when nothing is provided.
-        L.marker([markerData.lat, markerData.lon]).addTo(Drupal.Mapbox.layers[markerData.name]);
-
       }
-
     },
-    // end Drupal.behaviors.mapboxBridge
+    // end Drupal.behaviors.addMarker
 
     /*
     * Add a legend container with all the used markers
@@ -123,6 +125,7 @@
         }
       });
     }
+    // end Drupal.behaviors.addLegend
   };
 
 })(jQuery);

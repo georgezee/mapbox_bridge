@@ -3,3 +3,21 @@
 .custom-marker {
   cursor: inherit;
 }
+
+.custom-marker.clickable {
+  cursor: pointer;
+}
+
+/* Popup styles */
+.custom-popup-content {
+  min-height: 32px;
+}
+.custom-popup-content.loading {
+  background: url(../img/throbber.gif) no-repeat;
+  background-position: center;
+}
+
+/* hide it so we can show it in a fancy way */
+.custom-popup-content.loading > div:first-child {
+  display: none;
+}

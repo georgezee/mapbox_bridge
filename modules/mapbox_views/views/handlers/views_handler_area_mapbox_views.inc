@@ -23,11 +23,22 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => '', 'legend' => ''));
     $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => ''));
     $options['mapbox_max_zoom'] = array('default' => 12);
+
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+
+    // prepare a list of viewmodes
+    $view_modes = variable_get('entity_view_modes', array());
+    $view_mode_options = array();
+
+    foreach ($view_modes as $type => $view_mode) {
+      foreach ($view_mode as $key => $mode) {
+        $view_mode_options[$type][$key] = $mode['label'];
+      }
+    }
 
     drupal_add_css(drupal_get_path('module', 'mapbox_views') . '/css/mapbox_views.css');
 
@@ -98,6 +109,24 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#default_value' => $this->options['mapbox_marker']['legend'],
       '#mandatory' => TRUE
     );
+    $form['mapbox_marker']['popup_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Popup settings'),
+      '#collapsible' => TRUE,
+    );
+    $form['mapbox_marker']['popup_settings']['popup'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable popups'),
+      '#description' => t('Show a popup when clicking the marker'),
+      '#default_value' => $conf['popup'],
+    );
+    $form['mapbox_marker']['popup_settings']['popup_viewmode'] = array(
+      '#type' => 'select',
+      '#title' => t('Viewmode'),
+      '#options' => $view_mode_options,
+      '#description' => t('Viewmode to be used when displaying the popup'),
+      '#default_value' => $conf['popup_viewmode'],
+    );
 
     $form['mapbox_type'] = array(
       '#type' => 'fieldset',
@@ -139,7 +168,8 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['mapbox_marker']['legend'],
           $this->options['mapbox_type']['name'],
           $this->options['mapbox_type']['icon'],
-          $this->options['mapbox_max_zoom']
+          $this->options['mapbox_max_zoom'],
+          array('enabled' => $this->options['popup'], 'popup_viewmode' => $this->options['popup_viewmode'])
         );
         return $mapBuilder->getMap();
       }
