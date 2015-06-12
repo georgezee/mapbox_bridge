@@ -76,6 +76,16 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
  * */
 function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
 
+  // prepare a list of viewmodes
+  $view_modes = variable_get('entity_view_modes', array());
+  $options = array();
+
+  foreach ($view_modes as $type => $view_mode) {
+    foreach ($view_mode as $key => $mode) {
+      $options[$type][$key] = $mode['label'];
+    }
+  }
+
   $conf = $form_state['conf'];
 
   $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
