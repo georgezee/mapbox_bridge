@@ -45,6 +45,11 @@
               if (setting.mapboxBridge.popup.enabled) {
                 Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode);
               }
+
+              // check for touch devices and disable pan and zoom
+              if ('ontouchstart' in document.documentElement) {
+                Drupal.behaviors.mapboxBridge.panAndZoom(false);
+              }
             }
           });
 
@@ -124,8 +129,30 @@
           '</li>').appendTo('.mapbox-legend .legends');
         }
       });
-    }
+    },
     // end Drupal.behaviors.addLegend
+
+    panAndZoom: function(enable) {
+      if (!enable) {
+        // Disable drag and zoom handlers.
+        Drupal.Mapbox.map.dragging.disable();
+        Drupal.Mapbox.map.touchZoom.disable();
+        Drupal.Mapbox.map.doubleClickZoom.disable();
+        Drupal.Mapbox.map.scrollWheelZoom.disable();
+
+        // Disable tap handler, if present.
+        if (Drupal.Mapbox.map.tap) Drupal.Mapbox.map.tap.disable();
+      } else {
+        // Enable drag and zoom handlers.
+        Drupal.Mapbox.map.dragging.enable();
+        Drupal.Mapbox.map.touchZoom.enable();
+        Drupal.Mapbox.map.doubleClickZoom.enable();
+        Drupal.Mapbox.map.scrollWheelZoom.enable();
+
+        // Enable tap handler, if present.
+        if (Drupal.Mapbox.map.tap) Drupal.Mapbox.map.tap.enable();
+      }
+    }
   };
 
 })(jQuery);
