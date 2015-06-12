@@ -20,11 +20,14 @@
             minWidth: 150
           })
             // Bind popups to a click event
-            .on('click', function(e) {
-              $( '#custom-popup-id-' + e.target._leaflet_id ).load('/mapbox_bridge_ajax_content/' + viewmode + '/' + e.target.options.nid, function(e){
+            .on('click', function(marker) {
+
+              // load the node with the supplied viewmode
+              $( '#custom-popup-id-' + marker.target._leaflet_id ).load('/mapbox_bridge_ajax_content/' + viewmode + '/' + marker.target.options.nid, function(content){
                 var $this = $(this),
                     $content = $('> div:first-child', $this);
 
+                // gracefully slide in the content
                 $content
                   .css({
                     width: $this.width() + 'px', // to fix jQuery's jumpy sliding effect
@@ -36,7 +39,14 @@
                     }, 'fast');
                   });
 
+                // remove loading indicator
                 $this.removeClass('loading');
+
+                // center the newly clicked marker
+                var px = Drupal.Mapbox.map.project(marker.target._latlng); // find the pixel location on the map where the popup anchor is
+                    px.y -= marker.target._popup._container.clientHeight / 2; // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
+
+                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px), { animate: true }); // pan to new center
               });
             });
         });
