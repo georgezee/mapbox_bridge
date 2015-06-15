@@ -21,3 +21,59 @@
 .custom-popup-content.loading > div:first-child {
   display: none;
 }
+
+/* pan controls */
+.pan-control {
+  margin: 10px 10px 0 0;
+}
+.ui-pan {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.leaflet-control .ui-pan a.panner {
+  position: absolute;
+  display: block;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-color: rgba(0,0,0,.4);
+  border-radius: 3px;
+  box-shadow: none;
+  width: 26px;
+  height: 26px;
+  text-align: center;
+  color: #404040;
+  color: rgba(0,0,0,.75);
+  font-family: dingbats, arial unicode ms, code2000, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+}
+.leaflet-control .ui-pan a.panner:hover {
+  color: #000;
+  text-decoration: none;
+  background: #f8f8f8;
+}
+.leaflet-control .ui-pan a.panner.up {
+  top: 0;
+  left: 50%;
+  margin-left: -13px;
+  padding: 2px 0 0 0;
+}
+.leaflet-control .ui-pan a.panner.left {
+  top: 27px;
+  left: 0;
+  padding: 2px 2px 0 0;
+}
+.leaflet-control .ui-pan a.panner.down {
+  bottom: 0;
+  left: 50%;
+  margin-left: -13px;
+  padding: 2px 0 0 0;
+}
+.leaflet-control .ui-pan a.panner.right {
+  top: 27px;
+  right: 0px;
+  padding: 2px 0 0 0;
+}

@@ -132,25 +132,33 @@
     },
     // end Drupal.behaviors.addLegend
 
+    /*
+    * This disables the pan and zoom controls via input devices (mouse, touch, ect.)
+    * and replaces it with controls layed over the map.
+    * */
     panAndZoom: function(enable) {
       if (!enable) {
         // Disable drag and zoom handlers.
         Drupal.Mapbox.map.dragging.disable();
         Drupal.Mapbox.map.touchZoom.disable();
         Drupal.Mapbox.map.doubleClickZoom.disable();
-        Drupal.Mapbox.map.scrollWheelZoom.disable();
 
         // Disable tap handler, if present.
         if (Drupal.Mapbox.map.tap) Drupal.Mapbox.map.tap.disable();
+
+        // Enable pan controls
+        Drupal.MapboxPan.controls(true);
       } else {
         // Enable drag and zoom handlers.
         Drupal.Mapbox.map.dragging.enable();
         Drupal.Mapbox.map.touchZoom.enable();
         Drupal.Mapbox.map.doubleClickZoom.enable();
-        Drupal.Mapbox.map.scrollWheelZoom.enable();
 
         // Enable tap handler, if present.
         if (Drupal.Mapbox.map.tap) Drupal.Mapbox.map.tap.enable();
+
+        // Disable pan controls
+        Drupal.MapboxPan.controls(false);
       }
     }
   };
