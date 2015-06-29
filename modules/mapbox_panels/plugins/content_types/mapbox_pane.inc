@@ -45,7 +45,7 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['mapbox_id'],
         $conf['geo'],
         $conf['type'],
-        FALSE,
+        $conf['legend'],
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
@@ -165,6 +165,13 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
         'input[name="popup"]' => array('checked' => FALSE),
       ),
     ),
+  );
+  $form['mapbox_marker']['legend'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Mapbox Legend'),
+    '#description' => t('Will show a legend below the map with all marker type'),
+    '#default_value' => $conf['legend'],
+    '#mandatory' => TRUE
   );
   $form['mapbox_type'] = array(
     '#type' => 'fieldset',

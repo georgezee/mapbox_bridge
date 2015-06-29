@@ -173,6 +173,8 @@ class MapboxAreaBuilder {
    * @throws \PDOException
    */
   private function extractMarkersInfo($entityIds) {
+    global $language;
+
     // Start with geofield data
     $q = db_select("field_data_{$this->geofield}", 'g');
     $q->addField('g', "{$this->geofield}_lat", 'lat');
@@ -204,6 +206,13 @@ class MapboxAreaBuilder {
 
       $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_target_id");
       $q->addField('ttd', 'name', 'name');
+      $q->addField('ttd', 'tid', 'tid');
+
+      $q->leftJoin("field_data_name_field", "fdnf", "fdnf.entity_id = ttd.tid");
+      $q->addField('fdnf', 'name_field_value', 'translated_name');
+      $q->condition('fdnf.entity_type', 'taxonomy_term');
+      $q->condition('fdnf.language', $language->language);
+      $q->groupBy('ttd.tid');
     }
     else {
       $q->addExpression('NULL', 'type');
@@ -223,6 +232,12 @@ class MapboxAreaBuilder {
       $imagesize = getimagesize($marker->icon);
       $marker->iconWidth = $imagesize[0]; // width
       $marker->iconHeight = $imagesize[1]; // height
+
+      // get marker translation
+      if (isset($marker->translated_name)) {
+        $marker->name = $marker->translated_name;
+        unset($marker->translated_name);
+      }
     }
     return $markers;
   }
