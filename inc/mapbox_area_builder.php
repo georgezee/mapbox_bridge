@@ -65,6 +65,7 @@ class MapboxAreaBuilder {
     $this->fieldSymbolName = $symbolName;
     $this->max_zoom = $max_zoom;
     $this->popup = $popup;
+    $this->translated_legend = array();
   }
 
   /**
@@ -87,6 +88,7 @@ class MapboxAreaBuilder {
 
     $mapMarkers = $this->extractMarkersInfo($allEntityIds);
     $mapMarkers = $this->processMarkersSymbol($mapMarkers);
+    $mapMarkers = $this->extractLegendsInfo($mapMarkers);
 
     return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup);
   }
@@ -173,8 +175,6 @@ class MapboxAreaBuilder {
    * @throws \PDOException
    */
   private function extractMarkersInfo($entityIds) {
-    global $language;
-
     // Start with geofield data
     $q = db_select("field_data_{$this->geofield}", 'g');
     $q->addField('g', "{$this->geofield}_lat", 'lat');
@@ -207,12 +207,6 @@ class MapboxAreaBuilder {
       $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_target_id");
       $q->addField('ttd', 'name', 'name');
       $q->addField('ttd', 'tid', 'tid');
-
-      $q->leftJoin("field_data_name_field", "fdnf", "fdnf.entity_id = ttd.tid");
-      $q->addField('fdnf', 'name_field_value', 'translated_name');
-      $q->condition('fdnf.entity_type', 'taxonomy_term');
-      $q->condition('fdnf.language', $language->language);
-      $q->groupBy('ttd.tid');
     }
     else {
       $q->addExpression('NULL', 'type');
@@ -232,13 +226,39 @@ class MapboxAreaBuilder {
       $imagesize = getimagesize($marker->icon);
       $marker->iconWidth = $imagesize[0]; // width
       $marker->iconHeight = $imagesize[1]; // height
-
-      // get marker translation
-      if (isset($marker->translated_name)) {
-        $marker->name = $marker->translated_name;
-        unset($marker->translated_name);
-      }
     }
     return $markers;
+  }
+
+  private function extractLegendsInfo(array $markers) {
+    foreach($markers as $marker) {
+      if (!isset($this->translated_legend[$marker->tid])) {
+        $this->getLegendTranslation($marker->tid);
+      }
+
+      $marker->name = $this->translated_legend[$marker->tid];
+    }
+    return $markers;
+  }
+
+  private function getLegendTranslation($tid) {
+    global $language;
+
+    $q = db_select('field_data_name_field', 'fdnf');
+
+    $q->addField('fdnf', 'name_field_value', 'translated_name');
+    $q->addField('fdnf', 'language', 'language');
+    $q->condition('fdnf.entity_type', 'taxonomy_term');
+    $q->condition('fdnf.entity_id', $tid);
+
+    $results = $q->execute()->fetchAll();
+
+    foreach ($results as $result) {
+      if ($result->language == $language->language) {
+        $this->translated_legend[$tid] = $result->translated_name;
+      } else if (!isset($this->translated_legend[$tid]) && ($result->language == LANGUAGE_NONE || $result->language == 'en')) {
+        $this->translated_legend[$tid] = $result->translated_name;
+      }
+    }
   }
 }
