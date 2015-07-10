@@ -4,4 +4,5 @@ core = 7.x
 package = Mapbox
 configure = admin/config/user-interface/superfish
 
-dependencies[] = geofield, entity
+dependencies[] = geofield
+dependencies[] = entity
