@@ -213,7 +213,7 @@ class MapboxAreaBuilder {
       $q->addField('ttd', 'tid', 'tid');
     }
     else {
-      $q->addExpression('NULL', 'type');
+      $q->addExpression("'" . variable_get('mapbox_default_marker_name', 'marker') ."'", 'type');
     }
 
     return $q->execute()->fetchAll();
