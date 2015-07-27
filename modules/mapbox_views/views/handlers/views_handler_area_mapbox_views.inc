@@ -145,7 +145,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Icon'),
       '#description' => t('Field used to get custom icon file (field types: image, file)'),
       '#default_value' => $this->options['mapbox_type']['icon'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image,file/',
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image/',
     );
 
     // Count the existing mappings or reset to 1 when new.

@@ -202,6 +202,8 @@ class MapboxAreaBuilder {
         $q->leftJoin("field_data_{$this->fieldSymbolIcon}", "fsi", "fsi.entity_type = 'taxonomy_term' AND fsi.entity_id = m.{$this->markerTypeField}_target_id");
         $q->leftJoin("file_managed", "fm", "fm.fid = fsi.{$this->fieldSymbolIcon}_fid");
         $q->addField("fm", "uri", "icon");
+        $q->addField("fsi", "{$this->fieldSymbolIcon}_width", "iconWidth");
+        $q->addField("fsi", "{$this->fieldSymbolIcon}_height", "iconHeight");
       }
 
       $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_target_id");
@@ -220,12 +222,8 @@ class MapboxAreaBuilder {
       if (!isset($marker->type)) {
         $marker->type = '';
       }
-      $marker->icon = isset($marker->icon) ? file_create_url($marker->icon) : '';
 
-      // get image size
-      $imagesize = getimagesize($marker->icon);
-      $marker->iconWidth = $imagesize[0]; // width
-      $marker->iconHeight = $imagesize[1]; // height
+      $marker->icon = isset($marker->icon) ? file_create_url($marker->icon) : '';
     }
     return $markers;
   }
