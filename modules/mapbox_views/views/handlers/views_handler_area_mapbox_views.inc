@@ -8,6 +8,31 @@
 class views_handler_area_mapbox_views extends views_handler_area {
 
   /**
+   * @var array
+   *  Available zoom levels
+   */
+  private static $ZOOM_LEVELS = array(
+    1 => 1,
+    2 => 2,
+    3 => 3,
+    4 => 4,
+    5 => 5,
+    6 => 6,
+    7 => 7,
+    8 => 8,
+    9 => 9,
+    10 => 10,
+    11 => 11,
+    12 => 12,
+    13 => 13,
+    14 => 14,
+    15 => 15,
+    16 => 16,
+    17 => 17,
+    18 => 18,
+  );
+
+  /**
    * Handler name in view configuration page
    *
    * @return string
@@ -58,26 +83,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Max zoom level'),
       '#description' => t('The maximum level of zoom (the higher the level, the closer)'),
       '#default_value' => $this->options['mapbox_max_zoom'] ? $this->options['mapbox_max_zoom'] : 12,
-      '#options' => array(
-        1 => 1,
-        2 => 2,
-        3 => 3,
-        4 => 4,
-        5 => 5,
-        6 => 6,
-        7 => 7,
-        8 => 8,
-        9 => 9,
-        10 => 10,
-        11 => 11,
-        12 => 12,
-        13 => 13,
-        14 => 14,
-        15 => 15,
-        16 => 16,
-        17 => 17,
-        18 => 18,
-      ),
+      '#options' => self::$ZOOM_LEVELS,
       '#mandatory' => TRUE
     );
 
