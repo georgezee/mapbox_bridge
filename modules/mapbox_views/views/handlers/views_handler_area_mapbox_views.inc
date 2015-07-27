@@ -92,7 +92,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Geofield'),
       '#description' => t('Name of the field which contains coordinates (field type: geofield)'),
       '#default_value' => $this->options['mapbox_marker']['geo'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/geofield/',
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/geofield',
       '#mandatory' => TRUE
     );
     $form['mapbox_marker']['type'] = array(
@@ -138,14 +138,14 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Name'),
       '#description' => t('Field used to get standard symbol name (e.g.: bus, heart etc) for the marker (field types: text, list_text)'),
       '#default_value' => $this->options['mapbox_type']['name'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text/',
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text',
     );
     $form['mapbox_type']['icon'] = array(
       '#type' => 'textfield',
       '#title' => t('Icon'),
       '#description' => t('Field used to get custom icon file (field types: image, file)'),
       '#default_value' => $this->options['mapbox_type']['icon'],
-      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image/',
+      '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image',
     );
 
     // Count the existing mappings or reset to 1 when new.

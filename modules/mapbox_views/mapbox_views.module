@@ -3,9 +3,9 @@
  * Implements hook_menu().
  */
 function mapbox_views_menu() {
-  $items['mapbox_views_field_matching/autocomplete/%/%/%'] = array(
+  $items['mapbox_views_field_matching/autocomplete/%/%'] = array(
     'page callback' => '_mapbox_views_field_matching_autocomplete',
-    'page arguments' => array(2, 3, 4),
+    'page arguments' => array(2, 3),
     'access arguments' => array('administer views'),
     'type' => MENU_CALLBACK
   );
