@@ -88,7 +88,9 @@ class MapboxAreaBuilder {
 
     $mapMarkers = $this->extractMarkersInfo($allEntityIds);
     $mapMarkers = $this->processMarkersSymbol($mapMarkers);
-    $mapMarkers = $this->extractLegendsInfo($mapMarkers);
+    if ($this->legend) {
+      $mapMarkers = $this->extractLegendsInfo($mapMarkers);
+    }
 
     return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup);
   }
