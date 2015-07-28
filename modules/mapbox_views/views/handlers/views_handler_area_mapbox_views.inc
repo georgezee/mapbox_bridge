@@ -124,14 +124,14 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#type' => 'checkbox',
       '#title' => t('Enable popups'),
       '#description' => t('Show a popup when clicking the marker'),
-      '#default_value' => $conf['popup'],
+      '#default_value' => $this->options['mapbox_marker']['popup_settings']['popup'],
     );
     $form['mapbox_marker']['popup_settings']['popup_viewmode'] = array(
       '#type' => 'select',
       '#title' => t('Viewmode'),
       '#options' => $view_mode_options,
       '#description' => t('Viewmode to be used when displaying the popup'),
-      '#default_value' => $conf['popup_viewmode'],
+      '#default_value' => $this->options['mapbox_marker']['popup_settings']['popup_viewmode'],
     );
 
     $form['mapbox_type'] = array(
