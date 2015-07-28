@@ -40,6 +40,17 @@ class MapboxAreaBuilder {
   private $fieldSymbolIcon = '';
 
   /**
+   * @var array
+   *  Default icon specs
+   */
+  private $defaultIcon = array(
+    'name' => '',
+    'src' => '',
+    'width' => 0,
+    'height' => 0,
+  );
+
+  /**
    * Class constructor
    *
    * @param $object
@@ -54,8 +65,10 @@ class MapboxAreaBuilder {
    *  Field name used to store symbol name when standar one is used
    * @param string $symbolIcon
    *  Field name used to upload custom icons
+   * @param array $defaultIcon
+   *  Default icon specifications (value keys: name, src, width, height)
    */
-  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = FALSE) {
+  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = FALSE, array $defaultIcon = array()) {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
@@ -66,6 +79,7 @@ class MapboxAreaBuilder {
     $this->max_zoom = $max_zoom;
     $this->popup = $popup;
     $this->translated_legend = array();
+    $this->defaultIcon = $defaultIcon + $this->defaultIcon;
   }
 
   /**
@@ -211,6 +225,14 @@ class MapboxAreaBuilder {
       $q->leftJoin("taxonomy_term_data", "ttd", "ttd.tid = m.{$this->markerTypeField}_target_id");
       $q->addField('ttd', 'name', 'name');
       $q->addField('ttd', 'tid', 'tid');
+    }
+    elseif ($this->defaultIcon['src']) {
+      $q->addExpression("'custom'", 'type');
+      $q->addExpression("'custom'", 'name');
+      $q->addExpression("0", 'tid');
+      $q->addExpression("'{$this->defaultIcon['src']}'", 'icon');
+      $q->addExpression("'{$this->defaultIcon['width']}'", 'iconWidth');
+      $q->addExpression("'{$this->defaultIcon['height']}'", 'iconHeight');
     }
     else {
       $q->addExpression("'" . variable_get('mapbox_default_marker_name', 'marker') ."'", 'type');
