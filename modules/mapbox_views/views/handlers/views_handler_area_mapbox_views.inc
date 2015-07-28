@@ -242,12 +242,22 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Icon width'),
       '#description' => t('Icon width in pixels (needed for positioning)'),
       '#default_value' => $this->options['mapbox_type']['custom_icon_width'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('marker_type_taxonomy'),
+        )
+      )
     );
     $form['mapbox_type']['custom_icon_height'] = array(
       '#type' => 'textfield',
       '#title' => t('Icon width'),
       '#description' => t('Icon height in pixels (needed for positioning)'),
       '#default_value' => $this->options['mapbox_type']['custom_icon_height'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('marker_type_taxonomy'),
+        )
+      )
     );
     $form['mapbox_type']['name'] = array(
       '#type' => 'textfield',
