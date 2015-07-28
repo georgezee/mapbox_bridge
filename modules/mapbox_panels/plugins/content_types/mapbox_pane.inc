@@ -49,7 +49,8 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
-        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode'])
+        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
+        array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height'])
       );
 
       // save to block content
@@ -178,12 +179,50 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#title' => t('Symbol'),
     '#description' => t('Fields used to determine marker\'s type symbol'),
   );
+  $form['mapbox_type']['custom_icon_src'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Local path'),
+    '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+    '#default_value' => $conf['custom_icon_src'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
+  $form['mapbox_type']['custom_icon_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon width'),
+    '#description' => t('Icon width in pixels (needed for positioning)'),
+    '#default_value' => $conf['custom_icon_width'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
+  $form['mapbox_type']['custom_icon_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon width'),
+    '#description' => t('Icon height in pixels (needed for positioning)'),
+    '#default_value' => $conf['custom_icon_height'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
   $form['mapbox_type']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#description' => t('Field used to get standard symbol name (e.g.: bus, heart etc) for the marker (field types: text, list_text)'),
     '#default_value' => $conf['name'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text/',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => TRUE),
+      )
+    )
   );
   $form['mapbox_type']['icon'] = array(
     '#type' => 'textfield',
@@ -191,6 +230,11 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to get custom icon file (field types: image, file)'),
     '#default_value' => $conf['icon'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image,file/',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => TRUE),
+      )
+    )
   );
 
   return $form;
