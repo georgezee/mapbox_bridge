@@ -50,7 +50,8 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['icon'],
         $conf['mapbox_max_zoom'],
         array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
-        array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height'])
+        array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height']),
+        $conf['marker_anchor']
       );
 
       // save to block content
@@ -148,6 +149,21 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to determine marker type and symbol (field type: taxonomy term reference)'),
     '#default_value' => $conf['type'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/entityreference/',
+  );
+  $form['mapbox_marker']['marker_anchor'] = array(
+    '#type' => 'select',
+    '#title' => t('Marker anchor'),
+    '#description' => t('What is considered to be the "tip" of the marker icon'),
+    '#options' => array(
+      'center_center' => t('Center'),
+      'bottom_center' => t('Bottom center'),
+      'bottom_left' => t('Bottom left'),
+      'bottom_right' => t('Bottom right'),
+      'top_left' => t('Top left'),
+      'top_right' => t('Top right'),
+      'top_center' => t('Top center'),
+    ),
+    '#default_value' => $conf['marker_anchor'],
   );
   $form['mapbox_marker']['popup'] = array(
     '#type' => 'checkbox',
