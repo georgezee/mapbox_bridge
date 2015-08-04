@@ -51,6 +51,12 @@ class MapboxAreaBuilder {
   );
 
   /**
+   * @var string
+   *  Marker's anchor position
+   */
+  private $markerAnchor = '';
+
+  /**
    * Class constructor
    *
    * @param $object
@@ -67,8 +73,10 @@ class MapboxAreaBuilder {
    *  Field name used to upload custom icons
    * @param array $defaultIcon
    *  Default icon specifications (value keys: name, src, width, height)
+   * @param array $markerAnchor
+   *  Marker's anchor position
    */
-  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = FALSE, array $defaultIcon = array()) {
+  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = FALSE, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = FALSE, array $defaultIcon = array(), $markerAnchor = 'center_center') {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
@@ -80,6 +88,7 @@ class MapboxAreaBuilder {
     $this->popup = $popup;
     $this->translated_legend = array();
     $this->defaultIcon = $defaultIcon + $this->defaultIcon;
+    $this->markerAnchor = $markerAnchor;
   }
 
   /**
@@ -106,7 +115,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->extractLegendsInfo($mapMarkers);
     }
 
-    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup);
+    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor);
   }
 
   /**

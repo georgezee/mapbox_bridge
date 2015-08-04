@@ -75,6 +75,21 @@
       if (markerData.icon) {
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
 
+          // Calculate Icon's anchor position based on size and user preferences
+          var iconAnchorPosition = Drupal.behaviors.mapboxBridge.getIconAnchor(
+            markerData.iconWidth,
+            markerData.iconHeight,
+            setting.markerAnchor
+          );
+
+          // Calculate popup anchor position to be 3px above the marker and
+          // always centered on top of the icon
+          var popupAnchor = [
+            markerData.iconWidth / 2 - parseFloat(iconAnchorPosition[0]),
+            -(parseFloat(iconAnchorPosition[1]) + 3)
+          ];
+
+
           // create an icon
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
@@ -82,8 +97,8 @@
             marker: L.icon({
               'iconUrl': markerData.icon,
               'iconSize': [markerData.iconWidth, markerData.iconHeight],
-              'iconAnchor': [markerData.iconWidth / 2, markerData.iconHeight],
-              'popupAnchor': [0, -(markerData.iconHeight+3)],
+              'iconAnchor': iconAnchorPosition,
+              'popupAnchor': popupAnchor,
               'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
             })
           };
@@ -119,7 +134,7 @@
         }).addTo(Drupal.Mapbox.layers[markerData.name]);
       }
     },
-    // end Drupal.behaviors.addMarker
+    // end Drupal.behaviors.mapboxBridge.addMarker
 
     /*
     * Add a legend container with all the used markers
@@ -139,7 +154,7 @@
         }
       });
     },
-    // end Drupal.behaviors.addLegend
+    // end Drupal.behaviors.mapboxBridge.addLegend
 
     /*
     * This disables the pan and zoom controls via input devices (mouse, touch, ect.)
@@ -169,7 +184,43 @@
         // Disable pan controls
         Drupal.MapboxPan.controls(false);
       }
+    },
+    // end Drupal.behaviors.mapboxBridge.panAndZoom
+
+    /**
+     * Calculate marker's anchor position
+     *
+     * @param iconWidth
+     *  Icon image width
+     * @param iconHeight
+     *  Icon image height
+     * @param iconAnchor
+     *  String describing position. E.g.: center_center, bottom_left etc
+     *
+     * @returns Array
+     *  Array with anchor position
+     */
+    getIconAnchor: function(iconWidth, iconHeight, iconAnchor) {
+      // separate offset description and make sure we always have to elements
+      var offsets = iconAnchor.split('_').concat(['center']);
+
+      // Calculate Y offset
+      switch(offsets[0]) {
+        case 'top': offsetY = 0; break;
+        case 'bottom': offsetY = iconHeight; break;
+        default: offsetY = iconHeight / 2;
+      }
+
+      // Calculate X offset
+      switch(offsets[1]) {
+        case 'left': offsetX = 0; break;
+        case 'right': offsetX = iconWidth; break;
+        default: offsetX = Math.ceil(iconWidth / 2);
+      }
+
+      return [offsetX, offsetY];
     }
   };
+  // end Drupal.behaviors.mapboxBridge.getIconAnchor
 
 })(jQuery);

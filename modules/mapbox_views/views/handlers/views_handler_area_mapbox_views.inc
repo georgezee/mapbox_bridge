@@ -45,7 +45,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options = parent::option_definition();
     unset($options['label']);
     $options['mapbox_id'] = array('default' => '');
-    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => 'none', 'type_field' => '', 'legend' => ''));
+    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => 'none', 'type_field' => '', 'legend' => '', 'marker_anchor' => 'center_center'));
     $options['mapbox_popup'] = array('default' => array('popup' => FALSE, 'popup_viewmode' => 'teaser'));
     $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => '', 'custom_icon_src' => '', 'custom_icon_width' => '', 'custom_icon_height' => ''));
     $options['mapbox_max_zoom'] = array('default' => 12);
@@ -89,7 +89,8 @@ class views_handler_area_mapbox_views extends views_handler_area {
             'src' => $this->options['mapbox_type']['custom_icon_src'],
             'width' => $this->options['mapbox_type']['custom_icon_width'],
             'height' => $this->options['mapbox_type']['custom_icon_height'],
-          )
+          ),
+          $this->options['mapbox_marker']['marker_anchor']
         );
         return $mapBuilder->getMap();
       }
@@ -177,6 +178,22 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->formState('marker_type_none'),
         )
       )
+    );
+
+    $form['mapbox_marker']['marker_anchor'] = array(
+      '#type' => 'select',
+      '#title' => t('Marker anchor'),
+      '#description' => t('What is considered to be the "tip" of the marker icon'),
+      '#options' => array(
+        'center_center' => t('Center'),
+        'bottom_center' => t('Bottom center'),
+        'bottom_left' => t('Bottom left'),
+        'bottom_right' => t('Bottom right'),
+        'top_left' => t('Top left'),
+        'top_right' => t('Top right'),
+        'top_center' => t('Top center'),
+      ),
+      '#default_value' => $this->options['mapbox_marker']['marker_anchor'],
     );
 
     $form['mapbox_marker']['legend'] = array(
