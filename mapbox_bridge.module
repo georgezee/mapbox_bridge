@@ -38,25 +38,36 @@ function mapbox_bridge_ajax_content($viewmode, $nid) {
 /**
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE, $max_zoom = 12, $popup = FALSE) {
+function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE, $max_zoom = 12, $popup = FALSE, $filter = FALSE) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
     drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
 
+    // check the data
+    if (is_array($data) && !empty($data)) {
+      $data = json_encode($data);
+    } else if (is_string($data) && !empty($data)) {
+      $data = file_get_contents($data);
+    } else {
+      $data = FALSE;
+    }
+
     // add $map_id and token to javascript settings
     drupal_add_js(array('mapboxBridge' => array(
       'mapId' => $map_id,
-      'data' => $data ? json_encode($data) : FALSE,
+      'data' => $data,
       'publicToken' => variable_get('mapbox_bridge_public', NULL),
       'legend' => $legend,
       'maxZoom' => $max_zoom,
-      'popup' => $popup
+      'popup' => $popup,
+      'filter' => $filter,
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.popup.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.panControls.js', array('group' => JS_LIBRARY, 'weight' => -1));
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.filter.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
 
     // add mapbox_bridge.css for basic style overrides to mapbox

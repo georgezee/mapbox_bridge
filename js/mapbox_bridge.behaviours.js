@@ -26,43 +26,51 @@
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
             if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-              var data = $.parseJSON(setting.mapboxBridge.data);
-
-              // add markers
-              $.each(data, function(index, markerData){
-                Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
-              });
-
-              // set the pan & zoom of them map to show all visible markers.
-              Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureGroup.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
-
-              // add the legend if necessary
-              if (setting.mapboxBridge.legend) {
-                Drupal.behaviors.mapboxBridge.addLegend(setting, data);
-              }
-
-              // create the popups
-              if (setting.mapboxBridge.popup.enabled) {
-                Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode);
-              }
-
-              // check for touch devices and disable pan and zoom
-              if ('ontouchstart' in document.documentElement) {
-                Drupal.behaviors.mapboxBridge.panAndZoom(false);
-              }
+              Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), setting);
             }
           });
-
         });
       }
     },
     // end Drupal.behaviors.attach
 
     /**
+     * Initialize base settings
+     * */
+    init: function(data, setting) {
+      // add markers
+      $.each(data, function(index, markerData){
+        Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
+      });
+
+      // set the pan & zoom of them map to show all visible markers.
+      Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureGroup.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+
+      // add the legend if necessary
+      if (setting.mapboxBridge.legend) {
+        Drupal.behaviors.mapboxBridge.addLegend(setting, data);
+      }
+
+      // create the popups
+      if (setting.mapboxBridge.popup.enabled) {
+        Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode);
+      }
+
+      // create filters
+      if (setting.mapboxBridge.filter) {
+        Drupal.MapboxFilter.filter();
+      }
+
+      // check for touch devices and disable pan and zoom
+      if ('ontouchstart' in document.documentElement) {
+        Drupal.behaviors.mapboxBridge.panAndZoom(false);
+      }
+    },
+
+    /**
     * Add marker to the map
     * */
     addMarker: function(markerData, setting) {
-
       // for custom icons provided by drupal
       if (markerData.icon) {
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
@@ -85,7 +93,7 @@
         }
 
       // for icons based on mapbox
-      } else if (markerData.type) {
+      } else if (typeof markerData.type != 'undefined') {
 
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
           Drupal.Mapbox.icons[markerData.name] = {
@@ -106,7 +114,8 @@
         L.marker([markerData.lat, markerData.lon], {
           icon: Drupal.Mapbox.icons[markerData.name]['marker'],
           clickable: (setting.popup.enabled ? true : false),
-          nid: markerData.nid
+          nid: markerData.nid,
+          filter: markerData.filter
         }).addTo(Drupal.Mapbox.layers[markerData.name]);
       }
     },
