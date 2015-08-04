@@ -3,7 +3,9 @@
   Drupal.Mapbox = {};
   Drupal.Mapbox.icons = {};
   Drupal.Mapbox.layers = {};
-  Drupal.Mapbox.featureGroup;
+  Drupal.Mapbox.filters = {};
+  Drupal.Mapbox.geojson = [];
+  Drupal.Mapbox.featureLayer;
 
   /**
    * Mapbox with very basic setup
@@ -19,9 +21,6 @@
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = L.mapbox.map('map', setting.mapboxBridge.mapId);
           Drupal.Mapbox.map.scrollWheelZoom.disable();
-
-          // create feature group that will contain all the layers
-          Drupal.Mapbox.featureGroup = L.featureGroup().addTo(Drupal.Mapbox.map);
 
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
@@ -43,8 +42,11 @@
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
+      // use the created geojson to setup all the markers
+      Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson).addTo(Drupal.Mapbox.map);
+
       // set the pan & zoom of them map to show all visible markers.
-      Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureGroup.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+      Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
 
       // add the legend if necessary
       if (setting.mapboxBridge.legend) {
@@ -53,12 +55,12 @@
 
       // create the popups
       if (setting.mapboxBridge.popup.enabled) {
-        Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode);
+        Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode);
       }
 
       // create filters
-      if (setting.mapboxBridge.filter) {
-        Drupal.MapboxFilter.filter();
+      if (setting.mapboxBridge.filter.enabled) {
+        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.filter.filter_fields);
       }
 
       // check for touch devices and disable pan and zoom
@@ -89,7 +91,6 @@
             -(parseFloat(iconAnchorPosition[1]) + 3)
           ];
 
-
           // create an icon
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
@@ -102,9 +103,6 @@
               'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
             })
           };
-
-          // setup a new layer, one layer per type
-          Drupal.Mapbox.layers[markerData.name] = L.featureGroup().addTo(Drupal.Mapbox.featureGroup);
         }
 
       // for icons based on mapbox
@@ -117,21 +115,40 @@
               'marker-symbol': markerData.type
             })
           };
-
-          // setup a new layer, one layer per type
-          Drupal.Mapbox.layers[markerData.name] = L.featureGroup().addTo(Drupal.Mapbox.featureGroup);
         }
       }
 
       if (markerData.lat && markerData.lon && typeof Drupal.Mapbox.icons[markerData.name]['marker'] != 'undefined') {
 
+        // setup the filter properties
+        if (setting.filter.enabled) {
+          var filter = {};
+          $.each(setting.filter.filter_fields, function(i, filter_field){
+            filter[filter_field] = markerData[filter_field];
+
+            if (typeof Drupal.Mapbox.filters[filter_field] == 'undefined') {
+              Drupal.Mapbox.filters[filter_field] = {};
+            }
+
+            if (typeof Drupal.Mapbox.filters[filter_field][markerData[filter_field]] == 'undefined' && markerData[filter_field]) {
+              Drupal.Mapbox.filters[filter_field][markerData[filter_field]] = true;
+            }
+          });
+        }
+
         // set the marker with the custom icon
-        L.marker([markerData.lat, markerData.lon], {
-          icon: Drupal.Mapbox.icons[markerData.name]['marker'],
-          clickable: (setting.popup.enabled ? true : false),
-          nid: markerData.nid,
-          filter: markerData.filter
-        }).addTo(Drupal.Mapbox.layers[markerData.name]);
+        Drupal.Mapbox.geojson.push({
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Point',
+            'coordinates': [markerData.lon, markerData.lat]
+          },
+          'properties': {
+            'icon': Drupal.Mapbox.icons[markerData.name]['marker'],
+            'nid': markerData.nid,
+            'filter': setting.filter.enabled ? filter : FALSE
+          }
+        });
       }
     },
     // end Drupal.behaviors.mapboxBridge.addMarker

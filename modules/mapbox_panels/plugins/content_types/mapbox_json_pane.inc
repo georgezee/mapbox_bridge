@@ -40,7 +40,8 @@ function mapbox_json_pane_render_pane($subtype, $conf, $args, $context) {
     $conf['legend'],
     $conf['mapbox_max_zoom'],
     array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
-    $conf['filter']
+    'center_center',
+    array('enabled' => $conf['filter'], 'filter_fields' => explode(',', $conf['filter_fields']))
   );
 
   return $block;
@@ -143,6 +144,17 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Filter markers based on the "filter" attribute within the JSON'),
     '#default_value' => $conf['filter'],
     '#mandatory' => TRUE
+  );
+  $form['mapbox_marker']['filter_fields'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter fields'),
+    '#description' => t('Name of the fields that act as filters, seperated by a comma.'),
+    '#default_value' => $conf['filter_fields'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="filter"]' => array('checked' => FALSE),
+      ),
+    ),
   );
 
   return $form;
