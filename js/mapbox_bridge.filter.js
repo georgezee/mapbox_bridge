@@ -24,27 +24,28 @@
 
         // setup the filter behavior
         $('.mapbox-bridge-filter input').on('change', function(){
-          var activeFilter = {};
+          var activeFilter = {},
+              $this = $(this),
+              filtermatch = false;
 
           $('.mapbox-filters input:checked').each(function(){
             activeFilter[$(this).attr('name')] = $(this).val();
           });
 
-          Drupal.Mapbox.featureLayer.setFilter(function(feature) {
+          if ($.isEmptyObject(activeFilter)) {
+            filtermatch = true;
+          }
 
+          Drupal.Mapbox.featureLayer.setFilter(function(feature) {
             // no filter is set, show everything
-            if ($.isEmptyObject(activeFilter)) {
+            if (filtermatch) {
               return true;
             } else {
-              var filterMatches = false;
-
-              //$.each(activeFilter, function(filter_field, filter_value){
-              //  if (feature.properties.filter[filter_field] == filter_value) {
-              //    filterMatches = true;
-              //  }
-              //});
-
-              return filterMatches;
+              if (feature.properties.filter[$this.attr('name')] == $this.val()) {
+                return true;
+              } else {
+                return false;
+              }
             }
           });
         });
