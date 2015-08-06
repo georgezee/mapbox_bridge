@@ -45,7 +45,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options = parent::option_definition();
     unset($options['label']);
     $options['mapbox_id'] = array('default' => '');
-    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => 'none', 'type_field' => '', 'legend' => '', 'marker_anchor' => 'center_center'));
+    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => 'none', 'type_field' => '', 'legend' => '', 'marker_anchor' => 'center_center', 'cluster' => '', 'proximity' => ''));
     $options['mapbox_popup'] = array('default' => array('popup' => FALSE, 'popup_viewmode' => 'teaser'));
     $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => '', 'custom_icon_src' => '', 'custom_icon_width' => '', 'custom_icon_height' => ''));
     $options['mapbox_max_zoom'] = array('default' => 12);
@@ -90,7 +90,10 @@ class views_handler_area_mapbox_views extends views_handler_area {
             'width' => $this->options['mapbox_type']['custom_icon_width'],
             'height' => $this->options['mapbox_type']['custom_icon_height'],
           ),
-          $this->options['mapbox_marker']['marker_anchor']
+          $this->options['mapbox_marker']['marker_anchor'],
+          array('enabled' => false),
+          $this->options['mapbox_marker']['cluster'],
+          $this->options['mapbox_marker']['proximity']
         );
         return $mapBuilder->getMap();
       }
@@ -108,21 +111,16 @@ class views_handler_area_mapbox_views extends views_handler_area {
    * @param array $form
    * @return array
    */
-  private function formMapGeneralSettings($form) {
-    $form['mapbox_general'] = array(
-      '#type' => 'fieldset',
-      '#tree' => FALSE,
-      '#title' => t('Map settings')
-    );
+  private function formMapGeneralSettings(&$form) {
     $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
-    $form['mapbox_general']['mapbox_id'] = array(
+    $form['mapbox_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Mapbox ID'),
       '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
       '#default_value' => $this->options['mapbox_id'],
       '#mandatory' => TRUE
     );
-    $form['mapbox_general']['mapbox_max_zoom'] = array(
+    $form['mapbox_max_zoom'] = array(
       '#type' => 'select',
       '#title' => t('Max zoom level'),
       '#description' => t('The maximum level of zoom (the higher the level, the closer)'),
@@ -210,6 +208,22 @@ class views_handler_area_mapbox_views extends views_handler_area {
       )
     );
 
+    $form['mapbox_marker']['cluster'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Cluster'),
+      '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/leaflet-markercluster/', array('attributes' => array('target' => '_blank'))))),
+      '#default_value' => $this->options['mapbox_marker']['cluster'],
+      '#mandatory' => TRUE
+    );
+
+    $form['mapbox_marker']['proximity'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Proximity Search'),
+      '#description' => t('Enables the proximity search feeature, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/geocoding-auto/', array('attributes' => array('target' => '_blank'))))),
+      '#default_value' => $this->options['mapbox_marker']['proximity'],
+      '#mandatory' => TRUE
+    );
+
     return $form;
   }
 
@@ -234,7 +248,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
    * @param array $form
    * @return array
    */
-  private function formMarkersIconSettings($form) {
+  private function formMarkersIconSettings(&$form) {
     $form['mapbox_type'] = array(
       '#type' => 'fieldset',
       '#title' => t('Marker style'),

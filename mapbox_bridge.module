@@ -39,11 +39,18 @@ function mapbox_bridge_ajax_content($viewmode, $nid) {
  *
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE, $max_zoom = 12, $popup = FALSE, $markerAnchor = 'center_center', $filter = FALSE) {
+function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
     drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
+
+    // cluster files
+    if ($cluster) {
+      drupal_add_js('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js', 'external');
+      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css', 'external');
+      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css', 'external');
+    }
 
     // check the data
     if (is_array($data) && !empty($data)) {
@@ -64,6 +71,8 @@ function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE
       'popup' => $popup,
       'markerAnchor' => $markerAnchor,
       'filter' => $filter,
+      'cluster' => $cluster,
+      'proximity' => $proximity
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic

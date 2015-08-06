@@ -55,7 +55,12 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
-        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode'])
+        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
+        array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height']),
+        $conf['marker_anchor'],
+        array('enabled' => false),
+        $conf['cluster'],
+        $conf['proximity']
       );
 
       // save to block content
@@ -138,6 +143,7 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Fields used to get marker\'s basic information'),
     //'#collapsible' => TRUE,
   );
+
   $form['mapbox_marker']['geo'] = array(
     '#type' => 'textfield',
     '#title' => t('Geofield'),
@@ -146,6 +152,7 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/geofield/',
     '#mandatory' => TRUE
   );
+
   $form['mapbox_marker']['type'] = array(
     '#type' => 'textfield',
     '#title' => t('Type'),
@@ -153,12 +160,14 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#default_value' => $conf['type'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/node/entityreference/',
   );
+
   $form['mapbox_marker']['popup'] = array(
     '#type' => 'checkbox',
     '#title' => t('Popup'),
     '#description' => t('Show a popup when clicking the marker'),
     '#default_value' => $conf['popup'],
   );
+
   $form['mapbox_marker']['popup_viewmode'] = array(
     '#type' => 'select',
     '#title' => t('Viewmode'),
@@ -171,6 +180,7 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
       ),
     ),
   );
+
   $form['mapbox_marker']['legend'] = array(
     '#type' => 'checkbox',
     '#title' => t('Mapbox Legend'),
@@ -179,11 +189,28 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#mandatory' => TRUE
   );
 
+  $form['mapbox_marker']['cluster'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cluster'),
+    '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/leaflet-markercluster/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['cluster'],
+    '#mandatory' => TRUE
+  );
+
+  $form['mapbox_marker']['proximity'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Proximity Search'),
+    '#description' => t('Enables the proximity search feeature, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/geocoding-auto/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['proximity'],
+    '#mandatory' => TRUE
+  );
+
   $form['mapbox_type'] = array(
     '#type' => 'fieldset',
     '#title' => t('Symbol'),
     '#description' => t('Fields used to determine marker\'s type symbol'),
   );
+
   $form['mapbox_type']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
@@ -191,6 +218,7 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#default_value' => $conf['name'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text/',
   );
+
   $form['mapbox_type']['icon'] = array(
     '#type' => 'textfield',
     '#title' => t('Icon'),

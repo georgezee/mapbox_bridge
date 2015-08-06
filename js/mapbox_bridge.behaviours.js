@@ -6,12 +6,13 @@
   Drupal.Mapbox.filters = {};
   Drupal.Mapbox.geojson = [];
   Drupal.Mapbox.featureLayer;
+  Drupal.Mapbox.layerGroup;
 
   /**
    * Mapbox with very basic setup
    */
   Drupal.behaviors.mapboxBridge = {
-    attach: function (context, setting) {
+    attach: function(context, setting) {
       if (typeof L != 'undefined' && $('#map', context).length) {
         $('#map', context).once('mapbox-bridge', function(){
 
@@ -42,8 +43,27 @@
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
-      // use the created geojson to setup all the markers
-      Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson).addTo(Drupal.Mapbox.map);
+      // use the created geojson to load all the markers
+      Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson);
+
+      // wrap everything in a layerGroup
+      Drupal.Mapbox.layerGroup = L.layerGroup();
+
+      if (setting.mapboxBridge.cluster) {
+
+        // create clusterGroup and add it to the map
+        var clusterGroup = new L.MarkerClusterGroup().addTo(Drupal.Mapbox.layerGroup);
+
+        // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
+        Drupal.Mapbox.featureLayer.addTo(clusterGroup);
+      } else {
+
+        // add the featureLayer containing all the markers to the map
+        Drupal.Mapbox.featureLayer.addTo(Drupal.Mapbox.layerGroup);
+      }
+
+      // add the layerGroup to the map
+      Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
 
       // set the pan & zoom of them map to show all visible markers.
       Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
@@ -60,17 +80,24 @@
 
       // create filters
       if (setting.mapboxBridge.filter.enabled) {
-        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.filter.filter_fields);
+        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster);
       }
 
       // check for touch devices and disable pan and zoom
       if ('ontouchstart' in document.documentElement) {
         Drupal.behaviors.mapboxBridge.panAndZoom(false);
       }
+
+      // enable proximity search
+      if (setting.mapboxBridge.proximity) {
+        Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
+          autocomplete: true
+        }));
+      }
     },
 
     /**
-    * Add marker to the map
+    * Build marker geojson
     * */
     addMarker: function(markerData, setting) {
       // for custom icons provided by drupal
@@ -119,24 +146,40 @@
       }
 
       if (markerData.lat && markerData.lon && typeof Drupal.Mapbox.icons[markerData.name]['marker'] != 'undefined') {
-
         // setup the filter properties
         if (setting.filter.enabled) {
+
           var filter = {};
           $.each(setting.filter.filter_fields, function(i, filter_field){
-            filter[filter_field] = markerData[filter_field];
+            // filter_field are entered with a type definition ":type", we need to cut this off here.
+            var filter_type = filter_field.split(':')[1];
+            filter_field = filter_field.split(':')[0];
+
+            // used for geojson
+            if (typeof filter[filter_field] == 'undefined') {
+              filter[filter_field] = [];
+            }
+
+            // values might be separated by a comma
+            markerData[filter_field] = markerData[filter_field].split(', ');
+
+            filter[filter_field] = filter[filter_field].concat(markerData[filter_field]);
 
             if (typeof Drupal.Mapbox.filters[filter_field] == 'undefined') {
               Drupal.Mapbox.filters[filter_field] = {};
+              Drupal.Mapbox.filters[filter_field]['options'] = {};
+              Drupal.Mapbox.filters[filter_field]['type'] = filter_type;
             }
 
             if (typeof Drupal.Mapbox.filters[filter_field][markerData[filter_field]] == 'undefined' && markerData[filter_field]) {
-              Drupal.Mapbox.filters[filter_field][markerData[filter_field]] = true;
+              $.each(filter[filter_field], function(index, value){
+                Drupal.Mapbox.filters[filter_field]['options'][value] = true;
+              });
             }
           });
         }
 
-        // set the marker with the custom icon
+        // create geojson object with the provided attributes
         Drupal.Mapbox.geojson.push({
           'type': 'Feature',
           'geometry': {
@@ -146,7 +189,7 @@
           'properties': {
             'icon': Drupal.Mapbox.icons[markerData.name]['marker'],
             'nid': markerData.nid,
-            'filter': setting.filter.enabled ? filter : FALSE
+            'filter': setting.filter.enabled ? filter : false
           }
         });
       }

@@ -41,7 +41,9 @@ function mapbox_json_pane_render_pane($subtype, $conf, $args, $context) {
     $conf['mapbox_max_zoom'],
     array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
     'center_center',
-    array('enabled' => $conf['filter'], 'filter_fields' => explode(',', $conf['filter_fields']))
+    array('enabled' => $conf['filter'], 'filter_fields' => explode(',', $conf['filter_fields'])),
+    $conf['cluster'],
+    $conf['proximity']
   );
 
   return $block;
@@ -113,12 +115,14 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Fields used to get marker\'s basic information'),
     //'#collapsible' => TRUE,
   );
+
   $form['mapbox_marker']['popup'] = array(
     '#type' => 'checkbox',
     '#title' => t('Popup'),
     '#description' => t('Show a popup when clicking the marker'),
     '#default_value' => $conf['popup'],
   );
+
   $form['mapbox_marker']['popup_viewmode'] = array(
     '#type' => 'select',
     '#title' => t('Viewmode'),
@@ -131,6 +135,7 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
       ),
     ),
   );
+
   $form['mapbox_marker']['legend'] = array(
     '#type' => 'checkbox',
     '#title' => t('Mapbox Legend'),
@@ -138,6 +143,23 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
     '#default_value' => $conf['legend'],
     '#mandatory' => TRUE
   );
+
+  $form['mapbox_marker']['cluster'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cluster'),
+    '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/leaflet-markercluster/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['cluster'],
+    '#mandatory' => TRUE
+  );
+
+  $form['mapbox_marker']['proximity'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Proximity Search'),
+    '#description' => t('Enables the proximity search feeature, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/geocoding-auto/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['proximity'],
+    '#mandatory' => TRUE
+  );
+
   $form['mapbox_marker']['filter'] = array(
     '#type' => 'checkbox',
     '#title' => t('Mapbox Filter'),
@@ -145,10 +167,11 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
     '#default_value' => $conf['filter'],
     '#mandatory' => TRUE
   );
+
   $form['mapbox_marker']['filter_fields'] = array(
     '#type' => 'textfield',
     '#title' => t('Filter fields'),
-    '#description' => t('Name of the fields that act as filters, seperated by a comma.'),
+    '#description' => t('Name of the field that acts as a filter from the json and how it should be displayed. E.g. country:select (allowed: select, checkbox, radio) will render a select list with all the values from the "country" attribute inside the JSON, separate multiple fields by a comma.'),
     '#default_value' => $conf['filter_fields'],
     '#states' => array(
       'invisible' => array(

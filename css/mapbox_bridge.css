@@ -77,3 +77,12 @@
   right: 0px;
   padding: 2px 0 0 0;
 }
+
+/* cluster animation */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  -webkit-transition: -webkit-transform 0.3s ease-out, opacity 0.3s ease-in;
+  -moz-transition: -moz-transform 0.3s ease-out, opacity 0.3s ease-in;
+  -o-transition: -o-transform 0.3s ease-out, opacity 0.3s ease-in;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-in;
+}
