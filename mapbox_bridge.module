@@ -53,10 +53,8 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
     }
 
     // check the data
-    if (is_array($data) && !empty($data)) {
+    if (!empty($data)) {
       $data = json_encode($data);
-    } else if (is_string($data) && !empty($data)) {
-      $data = file_get_contents($data);
     } else {
       $data = FALSE;
     }

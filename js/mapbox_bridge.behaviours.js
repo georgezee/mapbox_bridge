@@ -46,6 +46,16 @@
       // use the created geojson to load all the markers
       Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson);
 
+      // Set a custom icon on each marker based on feature properties.
+      Drupal.Mapbox.map.on('layeradd', function(e) {
+        var marker = e.layer,
+            feature = marker.feature;
+
+        if (typeof feature != 'undefined') {
+          marker.setIcon(L.icon(feature.properties.icon));
+        }
+      });
+
       // wrap everything in a layerGroup
       Drupal.Mapbox.layerGroup = L.layerGroup();
 
@@ -122,13 +132,13 @@
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
             iconUrl: markerData.icon,
-            marker: L.icon({
+            marker: {
               'iconUrl': markerData.icon,
               'iconSize': [markerData.iconWidth, markerData.iconHeight],
               'iconAnchor': iconAnchorPosition,
               'popupAnchor': popupAnchor,
               'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
-            })
+            }
           };
         }
 
@@ -138,9 +148,9 @@
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
-            marker: L.mapbox.marker.icon({
+            marker: {
               'marker-symbol': markerData.type
-            })
+            }
           };
         }
       }

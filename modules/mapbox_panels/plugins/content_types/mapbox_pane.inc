@@ -254,7 +254,7 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
 
   $form['mapbox_type']['custom_icon_height'] = array(
     '#type' => 'textfield',
-    '#title' => t('Icon width'),
+    '#title' => t('Icon height'),
     '#description' => t('Icon height in pixels (needed for positioning)'),
     '#default_value' => $conf['custom_icon_height'],
     '#states' => array(

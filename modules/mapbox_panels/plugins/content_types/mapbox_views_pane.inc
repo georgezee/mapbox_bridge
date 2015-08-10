@@ -209,6 +209,52 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#mandatory' => TRUE
   );
 
+  $form['mapbox_marker']['marker_anchor'] = array(
+    '#type' => 'select',
+    '#title' => t('Marker anchor'),
+    '#description' => t('What is considered to be the "tip" of the marker icon'),
+    '#options' => array(
+      'center_center' => t('Center'),
+      'bottom_center' => t('Bottom center'),
+      'bottom_left' => t('Bottom left'),
+      'bottom_right' => t('Bottom right'),
+      'top_left' => t('Top left'),
+      'top_right' => t('Top right'),
+      'top_center' => t('Top center'),
+    ),
+    '#default_value' => $conf['marker_anchor'],
+  );
+
+  $form['mapbox_type'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Symbol'),
+    '#description' => t('Fields used to determine marker\'s type symbol'),
+  );
+
+  $form['mapbox_type']['custom_icon_src'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Local path'),
+    '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+    '#default_value' => $conf['custom_icon_src'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
+
+  $form['mapbox_type']['custom_icon_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon width'),
+    '#description' => t('Icon width in pixels (needed for positioning)'),
+    '#default_value' => $conf['custom_icon_width'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
+
   $form['mapbox_type'] = array(
     '#type' => 'fieldset',
     '#title' => t('Symbol'),

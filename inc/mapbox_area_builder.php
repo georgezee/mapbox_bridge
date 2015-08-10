@@ -103,17 +103,28 @@ class MapboxAreaBuilder {
    * @throws \PDOException
    */
   public function getMap() {
-    if (!isset($this->object->nid)) {
+    if (isset($this->object->nid)) {
+      $allEntityIds = [$this->object->nid];
+      $type = 'node';
+
+      $mapMarkers = $this->extractMarkersInfo($allEntityIds);
+      $mapMarkers = $this->processMarkersSymbol($mapMarkers);
+
+    } else if (is_string($this->object)) {
+      $mapMarkers = file_get_contents($this->object);
+      $mapMarkers = json_decode($mapMarkers);
+      $type = 'json';
+
+      $mapMarkers = $this->processJsonMarkers($mapMarkers);
+    } else {
       $allViewResults = $this->getAllViewResults();
       $allEntityIds = $this->extractEntityIds($allViewResults);
       $type = 'views';
-    } else {
-      $allEntityIds = [$this->object->nid];
-      $type = 'node';
+
+      $mapMarkers = $this->extractMarkersInfo($allEntityIds);
+      $mapMarkers = $this->processMarkersSymbol($mapMarkers);
     }
 
-    $mapMarkers = $this->extractMarkersInfo($allEntityIds);
-    $mapMarkers = $this->processMarkersSymbol($mapMarkers);
     if ($this->legend) {
       $mapMarkers = $this->extractLegendsInfo($mapMarkers);
     }
@@ -261,6 +272,20 @@ class MapboxAreaBuilder {
 
       $marker->icon = isset($marker->icon) ? file_create_url($marker->icon) : '';
     }
+    return $markers;
+  }
+
+  private function processJsonMarkers($markers) {
+    foreach($markers as $marker) {
+      if (!isset($marker->type)) {
+        $marker->type = '';
+      }
+
+      $marker->icon = file_create_url($this->defaultIcon['src']);
+      $marker->iconWidth = $this->defaultIcon['width'];
+      $marker->iconHeight = $this->defaultIcon['height'];
+    }
+
     return $markers;
   }
 
