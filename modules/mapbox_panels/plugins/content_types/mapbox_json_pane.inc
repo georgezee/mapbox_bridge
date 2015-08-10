@@ -49,7 +49,7 @@ function mapbox_json_pane_render_pane($subtype, $conf, $args, $context) {
       array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode'])),
       array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height']),
       $conf['marker_anchor'],
-      $conf['filter'],
+      array('enabled' => $conf['filter'], 'filter_fields' => explode(',', $conf['filter_fields'])),
       $conf['cluster'],
       $conf['proximity']
     );
