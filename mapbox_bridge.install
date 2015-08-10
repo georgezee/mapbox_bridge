@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * @file
+ *  Install file for the mapbox_bridge module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function mapbox_bridge_field_schema($field) {
+  return array(
+    'columns' => array(
+      'mapbox_id' => array(
+        'type' => 'varchar',
+        'description' => 'The mapbox id from https://www.mapbox.com/projects',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'data_source_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The source type to use, for example: "view", "current_node", "url"',
+        'not null' => TRUE,
+      ),
+      'data_source_id' => array(
+        'type' => 'varchar',
+        'length' => 1024,
+        'description' => 'The identifier of the source, for example: the view name, the field which contains the geolocation, the URL of the json file',
+        'not null' => TRUE,
+      ),
+      'max_zoom_level' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The maximum level of zoom (the higher the level, the closer)',
+      ),
+      'marker_popup' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Show a popup when clicking the marker.',
+      ),
+      'marker_view_mode' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'View mode to be used when displaying in the popup.',
+        'not null' => TRUE,
+      ),
+      'marker_legend' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Enable the marker legend below the map.',
+      ),
+      'marker_cluster' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Enable clustering.',
+      ),
+      'marker_proximity_search' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Enable the proximity search feature.',
+      ),
+      'marker_filter' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Filter markers based on the "filter" attribute within the JSON.',
+      ),
+      'marker_filter_fields' => array(
+        'type' => 'varchar',
+        'length' => 1024,
+        'description' => 'Name of the field that acts as a filter from the json. Separate multiple fields by a comma.',
+        'not null' => TRUE,
+      ),
+    ),
+  );
+}

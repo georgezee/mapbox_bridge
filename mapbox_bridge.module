@@ -88,3 +88,310 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
     return '<div class="mapbox-bridge mapbox-type-' . $type . '" id="map" style="width: 100%;"></div>';
   }
 }
+
+// Field hooks.
+// @todo: should we move the implementation in a helper class?
+
+/**
+ * Implements hook_field_info().
+ */
+
+function mapbox_bridge_field_info() {
+  return array(
+    'mapbox_bridge' => array(
+      'label' => t('Mapbox'),
+      'description' => t('Stores the settings for a mapbox field.'),
+      'settings' => array(),
+      'instance_settings' => array(),
+      'default_widget' => 'mapbox_bridge',
+      'default_formatter' => 'mapbox_bridge_default',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function mapbox_bridge_field_widget_info() {
+  return array(
+    'mapbox_bridge' => array(
+      'label' => 'Mapbox',
+      'field types' => array('mapbox_bridge'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+}
+/**
+ * Implements hook_element_info().
+ */
+function mapbox_bridge_element_info() {
+  $elements = array();
+  $elements['mapbox_bridge'] = array(
+    '#input' => TRUE,
+    '#process' => array('mapbox_bridge_field_process'),
+    '#theme_wrappers' => array('form_element'),
+  );
+  return $elements;
+}
+
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function mapbox_bridge_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element += array(
+    '#type' => $instance['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+  return $element;
+}
+
+/**
+ * Returns an array with the available types of data sources for the map.
+ *
+ * @todo: maybe extend this to invoke a hook if needed in the future.
+ */
+function _mapbox_bridge_data_source_types() {
+  return array(
+    'view' => array(
+      'title' => t('View'),
+      'element_callback' => 'mapbox_bridge_data_source_element_view',
+    ),
+    'current_node' => array(
+      'title' => t('Current node'),
+      'element_callback' => 'mapbox_bridge_data_source_element_current_node',
+    ),
+    'url' => array(
+      'title' => t('URL'),
+      'element_callback' => 'mapbox_bridge_data_source_element_url',
+    ),
+  );
+}
+
+/**
+ * Data source element callback for selecting a view.
+ *
+ * @param array $element
+ *  The main form element.
+ *  @see mapbox_bridge_field_process()
+ */
+function mapbox_bridge_data_source_element_view($element) {
+  // The View data source element will show a list of views which return data
+  // as json.
+  $data_source_element = array(
+    '#type' => 'select',
+    '#title' => t('Select a view'),
+    // @todo: should we put the default value in the main process function? mapbox_bridge_field_process()
+    '#default_value' => !empty($element['#value']['data_source_id']) ? $element['#value']['data_source_id'] : '',
+    '#description' => t('Select the view to be used as the source for the mapbox.'),
+    '#options' => array('view1' => 'View 1', 'view2' => 'View 2'),
+  );
+  return $data_source_element;
+}
+
+/**
+ * Data source element callback for selecting a geofield of the current node.
+ *
+ * @param $element
+ *  The main form element.
+ *  @see mapbox_bridge_field_process()
+ */
+function mapbox_bridge_data_source_element_current_node($element) {
+  // The Current node data source element will show a list of geofields of the
+  // node.
+  $data_source_element = array(
+    '#type' => 'select',
+    '#title' => t('Select a geofield'),
+    // @todo: should we put the default value in the main process function? mapbox_bridge_field_process()
+    '#default_value' => !empty($element['#value']['data_source_id']) ? $element['#value']['data_source_id'] : '',
+    '#description' => t('Select the geofield to be used as the source for the mapbox.'),
+    '#options' => array('geo1' => 'Geo1', 'geo2' => 'Geo 2'),
+  );
+  return $data_source_element;
+}
+
+/**
+ * Data source element callback for entering a simple URL to a json file.
+ *
+ * @param $element
+ *  The main form element.
+ *  @see mapbox_bridge_field_process()
+ */
+function mapbox_bridge_data_source_element_url($element) {
+  // The URL data source element will just let the user input an URL in a
+  // textfield.
+  // @todo: maybe add some validation?
+  $data_source_element = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    // @todo: should we put the default value in the main process function? mapbox_bridge_field_process()
+    '#default_value' => !empty($element['#value']['data_source_id']) ? $element['#value']['data_source_id'] : '',
+    '#description' => t('Input the URL to a JSON file.'),
+  );
+  return $data_source_element;
+}
+
+/**
+ * Process callback for the mapbox bridge field.
+ */
+function mapbox_bridge_field_process($element, $form_state, $complete_form) {
+  // On the field edit form, we do not really want to have the fields required,
+  // so the $make_required variable will be TRUE in all the cases when we are
+  // not on the field edit form.
+  // @todo: the problem here is when you have multiple values, then the last one
+  // will also require input. Disable for the moment.
+  //$make_required = ($complete_form['#form_id'] == 'field_ui_field_edit_form') ? FALSE : TRUE;
+  $make_required = FALSE;
+  // The mapbox id.
+  $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
+  $element['mapbox_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mapbox ID'),
+    '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
+    '#default_value' => !empty($element['#value']['mapbox_id']) ? $element['#value']['mapbox_id'] : '',
+    '#required' => $make_required,
+  );
+
+  // The data source option.
+  $data_source_options = array('' => t('--Select data source type--'));
+  $data_source_types = _mapbox_bridge_data_source_types();
+  foreach ($data_source_types as $key => $data_source) {
+    $data_source_options[$key] = $data_source['title'];
+  }
+  $data_source_id = user_password(20);
+  $data_source_type = !empty($element['#value']['data_source_type']) ? $element['#value']['data_source_type'] : '';
+  $element['data_source_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Data source type'),
+    '#description' => t('Please select the type of the data source for this map.'),
+    '#options' => $data_source_options,
+    '#default_value' => $data_source_type,
+    '#required' => $make_required,
+    '#ajax' => array(
+      'callback' => 'mapbox_bridge_data_source_type_ajax_callback',
+      'wrapper' => $data_source_id,
+      'method' => 'html',
+    ),
+  );
+
+  $element['data_source_id'] = array(
+    '#type' => 'item',
+  );
+  // Depending on which data source type we have selected, we will display a
+  // different element for the source id.
+  // @todo: this works, but there is an issue that when you change the data
+  // source type from views <=> current node an error message appears. Has to be
+  // fixed.
+  if (!empty($data_source_types[$data_source_type]) && function_exists($data_source_types[$data_source_type]['element_callback'])) {
+    $element['data_source_id'] = $data_source_types[$data_source_type]['element_callback']($element);
+  }
+  $element['data_source_id']['#prefix'] = '<div id="' . $data_source_id . '">';
+  $element['data_source_id']['#suffix'] = '</div>';
+
+  // The zoom level.
+  $element['max_zoom_level'] = array(
+    '#type' => 'select',
+    '#title' => t('Max zoom level'),
+    '#description' => t('The maximum level of zoom (the higher the level, the closer)'),
+    '#default_value' => !empty($element['#value']['max_zoom_level']) ? $element['#value']['max_zoom_level'] : 12,
+    '#options' => drupal_map_assoc(range(1, 18)),
+  );
+  // The marker popup flag.
+  $element['marker_popup'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Popup'),
+    '#description' => t('Show a popup when clicking the marker'),
+    '#default_value' => !empty($element['#value']['marker_popup']) ? $element['#value']['marker_popup'] : FALSE,
+  );
+
+  // The view mode of the marker popup.
+  $view_modes = variable_get('entity_view_modes', array());
+  $view_mode_options = array('' => t('--Select view mode--'));
+
+  foreach ($view_modes as $type => $view_mode) {
+    foreach ($view_mode as $key => $mode) {
+      $view_mode_options[$type][$key] = $mode['label'];
+    }
+  }
+  $element['marker_view_mode'] = array(
+    '#type' => 'select',
+    '#title' => t('View mode'),
+    '#options' => $view_mode_options,
+    '#description' => t('View mode to be used when displaying the popup.'),
+    '#default_value' => !empty($element['#value']['marker_view_mode']) ? $element['#value']['marker_view_mode'] : '',
+    '#states' => array(
+      'invisible' => array(
+        'input[name="' . $element['#name'] .'[marker_popup]"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  // The legend.
+  $element['marker_legend'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Mapbox Legend'),
+    '#description' => t('Will show a legend below the map with all marker type'),
+    '#default_value' => !empty($element['#value']['marker_legend']) ? $element['#value']['marker_legend'] : FALSE,
+  );
+
+  // The cluster.
+  $element['marker_cluster'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cluster'),
+    '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/leaflet-markercluster/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => !empty($element['#value']['marker_cluster']) ? $element['#value']['marker_cluster'] : FALSE,
+  );
+
+  // The proximity search.
+  $element['marker_proximity_search'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Proximity Search'),
+    '#description' => t('Enables the proximity search feature, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/geocoding-auto/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => !empty($element['#value']['marker_proximity_search']) ? $element['#value']['marker_proximity_search'] : FALSE,
+  );
+
+  // The filter.
+  $element['marker_filter'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Mapbox Filter'),
+    '#description' => t('Filter markers based on the "filter" attribute within the JSON'),
+    '#default_value' => !empty($element['#value']['marker_filter']) ? $element['#value']['marker_filter'] : FALSE,
+  );
+
+  $element['marker_filter_fields'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter fields'),
+    '#description' => t('Name of the field that acts as a filter from the json and how it should be displayed. E.g. country:select (allowed: select, checkbox, radio) will render a select list with all the values from the "country" attribute inside the JSON, separate multiple fields by a comma.'),
+    '#default_value' => !empty($element['#value']['marker_filter_fields']) ? $element['#value']['marker_filter_fields'] : '',
+    '#states' => array(
+      'invisible' => array(
+        'input[name="' . $element['#name'] .'[marker_filter]"' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function mapbox_bridge_field_is_empty($item, $field) {
+  return empty($item['mapbox_id']);
+}
+
+/**
+ * Ajax callback for when the data source type is changed.
+ */
+function mapbox_bridge_data_source_type_ajax_callback($form, $form_state) {
+  // The target element is one element below the triggering element.
+  $array_parents = $form_state['triggering_element']['#array_parents'];
+  array_pop($array_parents);
+
+  // Iterate over the form parents to find the element.
+  $element = $form;
+  foreach ($array_parents as $name) {
+    $element = &$element[$name];
+  }
+  return $element['data_source_id'];
+}
