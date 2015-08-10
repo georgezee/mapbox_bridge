@@ -39,7 +39,7 @@ function mapbox_json_pane_render_pane($subtype, $conf, $args, $context) {
     'json',
     $conf['legend'],
     $conf['mapbox_max_zoom'],
-    array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
+    array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode'])),
     'center_center',
     array('enabled' => $conf['filter'], 'filter_fields' => explode(',', $conf['filter_fields'])),
     $conf['cluster'],
@@ -63,6 +63,10 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
       $options[$type][$key] = $mode['label'];
     }
   }
+
+  // add the drupal default Node "Teaser" and "Default" viewmodes.
+  $options['node']['node_default'] = t('Default');
+  $options['node']['node_teaser'] = t('Teaser');
 
   $conf = $form_state['conf'];
 

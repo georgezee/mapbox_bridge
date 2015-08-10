@@ -83,7 +83,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['mapbox_max_zoom'],
           array(
             'enabled' => $this->options['mapbox_popup']['popup'],
-            'popup_viewmode' => $this->options['mapbox_popup']['popup_viewmode']
+            'popup_viewmode' => str_replace('node_', '', $this->options['mapbox_popup']['popup_viewmode'])
           ),
           array(
             'src' => $this->options['mapbox_type']['custom_icon_src'],
@@ -239,6 +239,11 @@ class views_handler_area_mapbox_views extends views_handler_area {
         $view_mode_options[$type][$key] = $mode['label'];
       }
     }
+
+    // add the drupal default Node "Teaser" and "Default" viewmodes.
+    $options['node']['node_default'] = t('Default');
+    $options['node']['node_teaser'] = t('Teaser');
+
     return $view_mode_options;
   }
 

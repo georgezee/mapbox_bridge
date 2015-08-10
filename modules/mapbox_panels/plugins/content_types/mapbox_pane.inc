@@ -49,7 +49,7 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
-        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode']),
+        array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode'])),
         array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height']),
         $conf['marker_anchor'],
         array('enabled' => false),
@@ -93,6 +93,10 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
       $options[$type][$key] = $mode['label'];
     }
   }
+
+  // add the drupal default Node "Teaser" and "Default" viewmodes.
+  $options['node']['node_default'] = t('Default');
+  $options['node']['node_teaser'] = t('Teaser');
 
   $conf = $form_state['conf'];
 
