@@ -103,6 +103,26 @@
         Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
           autocomplete: true
         }));
+
+        // place the proximity wrapper at the top
+        $('<div id="mapbox-proximity" class="mapbox-proximity"></div>').prependTo($('#map').parent());
+
+        // move the proximity search from inside the mapbox to the top
+        $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
+
+        // change the behaviour of the proximity search
+        var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
+        $resultsContainer.bind("DOMSubtreeModified",function(){
+          $resultsContainer.find('a').once(function(){
+            $(this).on('click', function(){
+              $resultsContainer.hide();
+            });
+          });
+        });
+
+        $('.leaflet-control-mapbox-geocoder-form input[type=text]').on('focus', function(){
+          $resultsContainer.show();
+        });
       }
     },
 
