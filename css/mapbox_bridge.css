@@ -86,3 +86,33 @@
   -o-transition: -o-transform 0.3s ease-out, opacity 0.3s ease-in;
   transition: transform 0.3s ease-out, opacity 0.3s ease-in;
 }
+
+/* prxomity search */
+.mapbox-proximity {
+  float: left;
+  clear: both;
+}
+.mapbox-proximity .leaflet-control-mapbox-geocoder {
+  float: none;
+  border: 0 none;
+
+}
+.mapbox-proximity .leaflet-control-mapbox-geocoder .leaflet-control-mapbox-geocoder-toggle {
+  display: none;
+}
+.mapbox-proximity .leaflet-control-mapbox-geocoder .leaflet-control-mapbox-geocoder-wrap {
+  opacity: 1;
+  width: auto;
+  left: 0;
+  position: relative;
+}
+.mapbox-proximity .leaflet-control-mapbox-geocoder-results {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  left: 0;
+}
+
+/* filter */
+.mapbox-filters {
+  clear: both;
+}

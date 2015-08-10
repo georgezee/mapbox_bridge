@@ -46,6 +46,16 @@
       // use the created geojson to load all the markers
       Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson);
 
+      // Set a custom icon on each marker based on feature properties.
+      Drupal.Mapbox.map.on('layeradd', function(e) {
+        var marker = e.layer,
+            feature = marker.feature;
+
+        if (typeof feature != 'undefined') {
+          marker.setIcon(L.icon(feature.properties.icon));
+        }
+      });
+
       // wrap everything in a layerGroup
       Drupal.Mapbox.layerGroup = L.layerGroup();
 
@@ -93,6 +103,26 @@
         Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
           autocomplete: true
         }));
+
+        // place the proximity wrapper at the top
+        $('<div id="mapbox-proximity" class="mapbox-proximity"></div>').prependTo($('#map').parent());
+
+        // move the proximity search from inside the mapbox to the top
+        $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
+
+        // change the behaviour of the proximity search
+        var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
+        $resultsContainer.bind("DOMSubtreeModified",function(){
+          $resultsContainer.find('a').once(function(){
+            $(this).on('click', function(){
+              $resultsContainer.hide();
+            });
+          });
+        });
+
+        $('.leaflet-control-mapbox-geocoder-form input[type=text]').on('focus', function(){
+          $resultsContainer.show();
+        });
       }
     },
 
@@ -122,13 +152,13 @@
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
             iconUrl: markerData.icon,
-            marker: L.icon({
+            marker: {
               'iconUrl': markerData.icon,
               'iconSize': [markerData.iconWidth, markerData.iconHeight],
               'iconAnchor': iconAnchorPosition,
               'popupAnchor': popupAnchor,
               'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
-            })
+            }
           };
         }
 
@@ -138,9 +168,9 @@
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
-            marker: L.mapbox.marker.icon({
+            marker: {
               'marker-symbol': markerData.type
-            })
+            }
           };
         }
       }
