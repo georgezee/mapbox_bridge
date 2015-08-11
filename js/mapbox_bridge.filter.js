@@ -4,11 +4,11 @@
    * Mapbox Filtering
    */
   Drupal.MapboxFilter = {
-    filter: function(layers, cluster) {
+    filter: function(layers, cluster, context, setting) {
       $('#map').once('mapbox-filters', function(){
 
         // setup the forms for filtering
-        Drupal.MapboxFilter.setup();
+        Drupal.MapboxFilter.setup(context, setting);
 
         // handle the form events
         Drupal.MapboxFilter.events(layers, cluster);
@@ -18,7 +18,7 @@
     /**
     * Setup of the filtering elements
     * */
-    setup: function() {
+    setup: function(context, setting) {
       // setup the filter for the user
       $('<div id="mapbox-filters" class="mapbox-filters"></div>').insertBefore('#map');
 
@@ -34,21 +34,24 @@
             if (attributes.type == 'select') {
 
               $('#filter-id-' + filter).once(function(){
-                $(this).append('<select id="' + filter + '" name="' + filter + '"><option value="all">' + Drupal.t('Please select a @type', {'@type': Drupal.t(filter)}) + '</option></select>');
+                $(this).append('<select id="' + filter + '" name="' + filter + '" class="form-select"><option value="all">' + Drupal.t('Please select a @type', {'@type': Drupal.t(filter)}) + '</option></select>');
               });
 
               $('#' + filter).append('<option value="' + Drupal.t(option) + '">' + Drupal.t(option) + '</option>');
 
             } else if (attributes.type == 'checkbox') {
 
-              $('#filter-id-' + filter).append('<input id="' + option + '" name="' + filter + '" type="checkbox" value="' + option + '"><label for="' + option + '">' + Drupal.t(option) + '</label>');
+              $('#filter-id-' + filter).append('<input id="' + option + '" name="' + filter + '" type="checkbox" value="' + option + '" class="form-checkbox"><label for="' + option + '">' + Drupal.t(option) + '</label>');
             } else if (attributes.type == 'radio') {
 
-              $('#filter-id-' + filter).append('<input id="' + option + '" name="' + filter + '" type="radio" value="' + option + '"><label for="' + option + '">' + Drupal.t(option) + '</label>');
+              $('#filter-id-' + filter).append('<input id="' + option + '" name="' + filter + '" type="radio" value="' + option + '" class="form-radio"><label for="' + option + '">' + Drupal.t(option) + '</label>');
             }
           }
         });
       });
+
+      // attach behaviors
+      Drupal.attachBehaviors(context, setting);
     },
 
     /**

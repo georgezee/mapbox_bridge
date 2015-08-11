@@ -52,6 +52,11 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css', 'external');
     }
 
+    // add chosen library
+    if (module_exists('chosen')) {
+      drupal_add_library('chosen', 'drupal.chosen');
+    }
+
     // check the data
     if (!empty($data)) {
       $data = json_encode($data);
