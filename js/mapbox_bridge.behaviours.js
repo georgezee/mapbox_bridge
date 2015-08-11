@@ -26,7 +26,7 @@
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
             if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-              Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), setting);
+              Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting);
             }
           });
         });
@@ -37,7 +37,7 @@
     /**
      * Initialize base settings
      * */
-    init: function(data, setting) {
+    init: function(data, context, setting) {
       // add markers
       $.each(data, function(index, markerData){
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
@@ -75,8 +75,12 @@
       // add the layerGroup to the map
       Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
 
-      // set the pan & zoom of them map to show all visible markers.
-      Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+      // set the pan & zoom of them map
+      if (setting.mapboxBridge.center) {
+        Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
+      } else {
+        Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+      }
 
       // add the legend if necessary
       if (setting.mapboxBridge.legend) {
@@ -90,7 +94,7 @@
 
       // create filters
       if (setting.mapboxBridge.filter.enabled) {
-        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster);
+        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
       }
 
       // check for touch devices and disable pan and zoom
@@ -112,7 +116,7 @@
 
         // change the behaviour of the proximity search
         var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
-        $resultsContainer.bind("DOMSubtreeModified",function(){
+        $resultsContainer.bind("DOMSubtreeModified propertychange",function(){
           $resultsContainer.find('a').once(function(){
             $(this).on('click', function(){
               $resultsContainer.hide();

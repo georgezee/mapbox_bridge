@@ -49,6 +49,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options['mapbox_popup'] = array('default' => array('popup' => FALSE, 'popup_viewmode' => 'teaser'));
     $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => '', 'custom_icon_src' => '', 'custom_icon_width' => '', 'custom_icon_height' => ''));
     $options['mapbox_max_zoom'] = array('default' => 12);
+    $options['center'] = array('default' => '');
 
     return $options;
   }
@@ -93,7 +94,8 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['mapbox_marker']['marker_anchor'],
           array('enabled' => false),
           $this->options['mapbox_marker']['cluster'],
-          $this->options['mapbox_marker']['proximity']
+          $this->options['mapbox_marker']['proximity'],
+          $this->options['center']
         );
         return $mapBuilder->getMap();
       }
@@ -127,6 +129,12 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#default_value' => $this->options['mapbox_max_zoom'] ? $this->options['mapbox_max_zoom'] : 12,
       '#options' => self::$ZOOM_LEVELS,
       '#mandatory' => TRUE
+    );
+    $form['center'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Default Center'),
+      '#description' => t('I entered, the map will center around the given coordinates, provide latitude and longitude like so: 13,37'),
+      '#default_value' => $this->options['center'],
     );
     return $form;
   }
