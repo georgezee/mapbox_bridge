@@ -282,7 +282,7 @@ class MapboxField {
             'width' => !empty($item['marker_icon_width']) ? $item['marker_icon_width'] : NULL,
             'height' => !empty($item['marker_icon_height']) ? $item['marker_icon_height'] : NULL,
           ),
-          !empty($item['marker_anchor']) ? TRUE : FALSE,
+          !empty($item['marker_anchor']) ? $item['marker_anchor'] : 'center_center',
           array(
             'enabled' => !empty($item['marker_filter']) ? TRUE : FALSE,
             'filter_fields' => !empty($item['marker_filter_fields'])? explode(',', $item['marker_filter_fields']) : NULL,
@@ -290,17 +290,17 @@ class MapboxField {
           !empty($item['cluster']) ? TRUE : FALSE,
           !empty($item['proximity']) ? TRUE : FALSE
         );
+
+        $elements[$delta] = array(
+          '#markup' => $mapBuilder->getMap(),
+          '#element' => $item,
+          '#field' => $instance,
+          '#display' => $display,
+        );
       }
       catch(Exception $e) {
         watchdog_exception('mapbox_views', $e);
       }
-
-      $elements[$delta] = array(
-        '#markup' => $mapBuilder->getMap(),
-        '#element' => $item,
-        '#field' => $instance,
-        '#display' => $display,
-      );
     }
     return $elements;
   }
