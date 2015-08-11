@@ -287,8 +287,8 @@ class MapboxField {
             'enabled' => !empty($item['marker_filter']) ? TRUE : FALSE,
             'filter_fields' => !empty($item['marker_filter_fields'])? explode(',', $item['marker_filter_fields']) : NULL,
           ),
-          !empty($item['cluster']) ? TRUE : FALSE,
-          !empty($item['proximity']) ? TRUE : FALSE
+          !empty($item['marker_cluster']) ? TRUE : FALSE,
+          !empty($item['marker_proximity_search']) ? TRUE : FALSE
         );
 
         $elements[$delta] = array(
