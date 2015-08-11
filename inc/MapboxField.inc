@@ -141,6 +141,9 @@ class MapboxField {
         $view_mode_options[$type][$key] = $mode['label'];
       }
     }
+    // add the drupal default Node "Teaser" and "Default" viewmodes.
+    $view_mode_options['node']['node_default'] = t('Default');
+    $view_mode_options['node']['node_teaser'] = t('Teaser');
     $element['marker_view_mode'] = array(
       '#type' => 'select',
       '#title' => t('View mode'),
