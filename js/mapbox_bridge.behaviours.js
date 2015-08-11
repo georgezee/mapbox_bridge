@@ -66,7 +66,6 @@
       // for custom icons provided by drupal
       if (markerData.icon) {
         if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
-
           // create an icon
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
@@ -75,7 +74,7 @@
               'iconUrl': markerData.icon,
               'iconSize': [markerData.iconWidth, markerData.iconHeight],
               'iconAnchor': [markerData.iconWidth / 2, markerData.iconHeight],
-              'popupAnchor': [0, -(markerData.iconHeight+3)],
+              'popupAnchor': [0, -markerData.iconHeight],
               'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
             })
           };
