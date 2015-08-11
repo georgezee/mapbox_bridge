@@ -152,7 +152,6 @@ class MapboxAreaBuilder {
       $tempView->live_preview = TRUE; // Disables some caches
       $tempView->pre_execute();
       $tempView->execute();
-
       return $tempView->result;
     }
     else {

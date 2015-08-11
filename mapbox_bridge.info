@@ -6,3 +6,5 @@ configure = admin/config/user-interface/superfish
 
 dependencies[] = geofield
 dependencies[] = entity
+
+files[] = inc/MapboxField.inc
