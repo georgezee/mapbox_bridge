@@ -76,7 +76,7 @@ class MapboxAreaBuilder {
    * @param array $markerAnchor
    *  Marker's anchor position
    */
-  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false) {
+  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE) {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
@@ -92,6 +92,7 @@ class MapboxAreaBuilder {
     $this->filter = $filter;
     $this->cluster = $cluster;
     $this->proximity = $proximity;
+    $this->center = $center;
   }
 
   /**
@@ -111,7 +112,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->processMarkersSymbol($mapMarkers);
 
     } else if (is_string($this->object)) {
-      $mapMarkers = file_get_contents($this->object);
+      $mapMarkers = file_get_contents(url($this->object));
       $mapMarkers = json_decode($mapMarkers);
       $type = 'json';
 
@@ -129,7 +130,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->extractLegendsInfo($mapMarkers);
     }
 
-    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->cluster, $this->proximity);
+    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->cluster, $this->proximity, $this->center);
   }
 
   /**

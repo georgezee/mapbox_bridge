@@ -60,7 +60,8 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['marker_anchor'],
         array('enabled' => false),
         $conf['cluster'],
-        $conf['proximity']
+        $conf['proximity'],
+        $conf['center']
       );
 
       // save to block content
@@ -139,6 +140,13 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
       18 => 18,
     ),
     '#mandatory' => TRUE
+  );
+
+  $form['center'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default Center'),
+    '#description' => t('I entered, the map will center around the given coordinates, provide latitude and longitude like so: 13,37'),
+    '#default_value' => $conf['center'],
   );
 
   $form['mapbox_marker'] = array(

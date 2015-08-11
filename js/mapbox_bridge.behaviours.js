@@ -75,8 +75,12 @@
       // add the layerGroup to the map
       Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
 
-      // set the pan & zoom of them map to show all visible markers.
-      Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+      // set the pan & zoom of them map
+      if (setting.mapboxBridge.center) {
+        Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
+      } else {
+        Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+      }
 
       // add the legend if necessary
       if (setting.mapboxBridge.legend) {
