@@ -276,7 +276,7 @@ class MapboxField {
           !empty($item['max_zoom_level']) ? $item['max_zoom_level'] : 12,
           array(
             'enabled' => !empty($item['marker_popup']) ? TRUE : FALSE,
-            'popup_viewmode' => !empty($item['marker_view_mode']) ? $item['marker_view_mode'] : NULL),
+            'popup_viewmode' => !empty($item['marker_view_mode']) ? str_replace('node_', '', $item['marker_view_mode']) : NULL),
           array(
             'src' => !empty($item['marker_icon_src']) ? $item['marker_icon_src'] : NULL,
             'width' => !empty($item['marker_icon_width']) ? $item['marker_icon_width'] : NULL,
