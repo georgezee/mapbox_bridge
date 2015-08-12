@@ -310,7 +310,8 @@ class MapboxField {
             'filter_fields' => $filter_fields,
           ),
           !empty($item['marker_cluster']) ? TRUE : FALSE,
-          !empty($item['marker_proximity_search']) ? TRUE : FALSE
+          !empty($item['marker_proximity_search']) ? TRUE : FALSE,
+          !empty($item['center']) ? $item['center'] : FALSE
         );
 
         $elements[$delta] = array(
