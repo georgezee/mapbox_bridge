@@ -75,7 +75,7 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       'markerAnchor' => $markerAnchor,
       'filter' => $filter,
       'cluster' => $cluster,
-      'proximity' => $proximity,
+      'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center
     )), 'setting');
 

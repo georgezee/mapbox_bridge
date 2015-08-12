@@ -103,13 +103,13 @@
       }
 
       // enable proximity search
-      if (setting.mapboxBridge.proximity) {
+      if (setting.mapboxBridge.proximity.enabled) {
         Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
           autocomplete: true
         }));
 
         // place the proximity wrapper at the top
-        $('<div id="mapbox-proximity" class="mapbox-proximity"></div>').prependTo($('#map').parent());
+        $('<div id="mapbox-proximity" class="mapbox-proximity"><h3>' + setting.mapboxBridge.proximity.label + '</h3></div>').prependTo($('#map').parent());
 
         // move the proximity search from inside the mapbox to the top
         $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
