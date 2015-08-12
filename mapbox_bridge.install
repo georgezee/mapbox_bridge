@@ -34,6 +34,12 @@ function mapbox_bridge_field_schema($field) {
         'not null' => TRUE,
         'description' => 'The maximum level of zoom (the higher the level, the closer)',
       ),
+      'center' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The coordinates, separated by comma, where to center the map.',
+        'not null' => FALSE,
+      ),
       'marker_popup' => array(
         'type' => 'int',
         'not null' => FALSE,

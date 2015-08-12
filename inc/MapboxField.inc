@@ -124,6 +124,13 @@ class MapboxField {
       '#default_value' => !empty($element['#value']['max_zoom_level']) ? $element['#value']['max_zoom_level'] : 12,
       '#options' => drupal_map_assoc(range(1, 18)),
     );
+    // Center around the coordinates.
+    $element['center'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Center coordinates'),
+      '#description' => t('If entered, the map will center around the given coordinates. Provide latitude and longitude like: 13,37'),
+      '#default_value' => !empty($element['#value']['center']) ? $element['#value']['center'] : '',
+    );
     // The marker popup flag.
     $element['marker_popup'] = array(
       '#type' => 'checkbox',
