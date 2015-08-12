@@ -265,6 +265,21 @@ class MapboxField {
     foreach ($items as $delta => $item) {
       try {
         $mapbox_source = mapbox_bridge_get_data_source($item, $entity_type, $entity);
+        $filter_fields = !empty($item['marker_filter_fields'])? explode(',', $item['marker_filter_fields']) : NULL;
+        // In order to be able to have the filters translated, we need to do it
+        // in php, not in javascript. The Drupal.t() function does not work on
+        // variables, so something like: "Drupal.t(filter)" will not work.
+        if (!empty($filter_fields)) {
+          foreach ($filter_fields as $filter_field_key => $filter_field) {
+            $words = explode(':', $filter_field);
+            // We do this only if we have exactly 2 words, otherwise the string
+            // is already considered to be translated.
+            if (count($words) == 2) {
+              $words[2] = t(trim($words[0]), array(), array('context' => 'mapbox_filter'));
+              $filter_fields[$filter_field_key] = implode(':', $words);
+            }
+          }
+        }
         $mapBuilder = new MapboxAreaBuilder(
           $mapbox_source,
           $item['mapbox_id'],
@@ -285,7 +300,7 @@ class MapboxField {
           !empty($item['marker_anchor']) ? $item['marker_anchor'] : 'center_center',
           array(
             'enabled' => !empty($item['marker_filter']) ? TRUE : FALSE,
-            'filter_fields' => !empty($item['marker_filter_fields'])? explode(',', $item['marker_filter_fields']) : NULL,
+            'filter_fields' => $filter_fields,
           ),
           !empty($item['marker_cluster']) ? TRUE : FALSE,
           !empty($item['marker_proximity_search']) ? TRUE : FALSE

@@ -124,7 +124,7 @@
           });
         });
 
-        $('.leaflet-control-mapbox-geocoder-form input[type=text]').on('focus', function(){
+        $('.leaflet-control-mapbox-geocoder-form input[type=text]').attr('placeholder', Drupal.t('Search')).on('focus', function(){
           $resultsContainer.show();
         });
       }
@@ -186,29 +186,39 @@
           var filter = {};
           $.each(setting.filter.filter_fields, function(i, filter_field){
             // filter_field are entered with a type definition ":type", we need to cut this off here.
-            var filter_type = filter_field.split(':')[1];
-            filter_field = filter_field.split(':')[0];
+            var words = filter_field.split(':');
+            filter_field = words[0];
+            if (typeof markerData[filter_field] != 'undefined') {
+              var filter_type = words[1];
+              // The translated label, if we have it, should be on the third
+              // position.
+              var translated_label = words[0];
+              if (typeof words[2] != 'undefined') {
+                translated_label = words[2];
+              }
 
-            // used for geojson
-            if (typeof filter[filter_field] == 'undefined') {
-              filter[filter_field] = [];
-            }
+              // used for geojson
+              if (typeof filter[filter_field] == 'undefined') {
+                filter[filter_field] = [];
+              }
 
-            // values might be separated by a comma
-            markerData[filter_field] = markerData[filter_field].split(', ');
+              // values might be separated by a comma
+              markerData[filter_field] = markerData[filter_field].split(', ');
 
-            filter[filter_field] = filter[filter_field].concat(markerData[filter_field]);
+              filter[filter_field] = filter[filter_field].concat(markerData[filter_field]);
 
-            if (typeof Drupal.Mapbox.filters[filter_field] == 'undefined') {
-              Drupal.Mapbox.filters[filter_field] = {};
-              Drupal.Mapbox.filters[filter_field]['options'] = {};
-              Drupal.Mapbox.filters[filter_field]['type'] = filter_type;
-            }
+              if (typeof Drupal.Mapbox.filters[filter_field] == 'undefined') {
+                Drupal.Mapbox.filters[filter_field] = {};
+                Drupal.Mapbox.filters[filter_field]['options'] = {};
+                Drupal.Mapbox.filters[filter_field]['type'] = filter_type;
+                Drupal.Mapbox.filters[filter_field]['translated_label'] = translated_label;
+              }
 
-            if (typeof Drupal.Mapbox.filters[filter_field][markerData[filter_field]] == 'undefined' && markerData[filter_field]) {
-              $.each(filter[filter_field], function(index, value){
-                Drupal.Mapbox.filters[filter_field]['options'][value] = true;
-              });
+              if (typeof Drupal.Mapbox.filters[filter_field][markerData[filter_field]] == 'undefined' && markerData[filter_field]) {
+                $.each(filter[filter_field], function (index, value) {
+                  Drupal.Mapbox.filters[filter_field]['options'][value] = true;
+                });
+              }
             }
           });
         }
