@@ -89,7 +89,7 @@
 
       // create the popups
       if (setting.mapboxBridge.popup.enabled) {
-        Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode);
+        Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
       }
 
       // create filters

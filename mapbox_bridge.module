@@ -64,6 +64,9 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       $data = FALSE;
     }
 
+    global $_domain_variant;
+    global $language;
+
     // add $map_id and token to javascript settings
     drupal_add_js(array('mapboxBridge' => array(
       'mapId' => $map_id,
@@ -76,7 +79,8 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       'filter' => $filter,
       'cluster' => $cluster,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
-      'center' => $center
+      'center' => $center,
+      'path_settings' => array('domain_variant' => $_domain_variant->prefix, 'language' => $language->prefix)
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
