@@ -105,7 +105,7 @@ class MapboxAreaBuilder {
    */
   public function getMap() {
     if (isset($this->object->nid)) {
-      $allEntityIds = [$this->object->nid];
+      $allEntityIds = array($this->object->nid);
       $type = 'node';
 
       $mapMarkers = $this->extractMarkersInfo($allEntityIds);
