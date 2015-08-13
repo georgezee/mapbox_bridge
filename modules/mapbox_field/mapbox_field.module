@@ -1,5 +1,42 @@
 <?php
 
+/*
+Notes for the Technical Assessment
+by George Ziady
+----------------
+1. I'd normally spend some more time with the client / project manager initially
+  to confirm the requirements more carefully, but I got the impression that it 
+  was more important for you to see code written to achieve a certain objective, 
+  rather than specific details regarding certain fields.
+2. The following features should work correctly:
+  - installing the module
+  - adding the field to a content type
+  - saving data in the field
+3. I used the form from the Panel Panes (mapbox_json_pane.inc) as the basis for which
+   fields to include.
+4. The following is still missing:
+  - correct display of the captured map (a dump of the captured data is shown instead)
+  - form validation
+5. I am aware of the following bugs:
+  - defaults saved when configuring the field on the content type don't show up on the form 
+6. I'd be happy to continue to address any of the missing features/bugs if needed.
+7. My time breakdown was as follows:
+    1.2   Installed new site, added Mapbox modules. Created MB account and added keys. Examining existing code. Troubleshooting map not displaying code.
+    0.84    Exploring code, discovery of existing module, conversation with Vasi regarding next steps.
+    0.48    Checking field example module and other sample code.
+    1.05    Reviewing sample codes. Created Mapbox Field module structure.
+    1.77    Created first version of working fields module. Added schema and widget info for all fields.
+    1.27    Troubleshooting issue with default values. Code review and cleanup. Testing and submission.
+   Total: 6.61 hours
+
+8. I'd be happy to answer any questions you may have regarding the approach I took
+   or any decisions made. 
+
+Thanks,
+George
+
+*/
+
 /**
  * Implements hook_field_info().
  */
