@@ -1,0 +1,5 @@
+name = Mapbox field
+description = Contains the MapBox compound field.
+package = Mapbox
+core = 7.x
+dependencies[] = mapbox_bridge

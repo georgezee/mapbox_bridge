@@ -1,0 +1,281 @@
+<?php
+
+/**
+ * Implements hook_field_info().
+ */
+function mapbox_field_field_info() {
+  return array(
+    'mapbox' => array(
+      'label' => t('Mapbox'),
+      'description' => t('This field stores a Mapbox representation.'),
+      'default_widget' => 'mapbox_field_field',
+      'default_formatter' => 'mapbox_field_default',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function mapbox_field_field_widget_info() {
+  // @todo: Users may want to use methods besides a JSON file to input the map data
+  //   We should consider alternate input methods
+  return array(
+    'mapbox_field_field' => array(
+      'label' => t('Mapbox Widget with JSON'),
+      'field types' => array('mapbox'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_settings_form().
+ */
+function mapbox_field_field_settings_form($field, $instance, $has_data) {
+  $settings = $field['settings'];
+  // Add your global settings fields here
+  $form = array();
+  return $form;
+}
+
+/**
+ * Implements hook_field_instance_settings_form().
+ */
+function mapbox_field_field_instance_settings_form($field, $instance) {
+  $settings = $instance['settings'];
+  // Add your instance settings fields here.
+  $form = array();
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function mapbox_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+
+  // @todo: Consider consolidating the multiple form definitions across the
+  //        different areas (views/panes/field type) to prevent duplication of code.
+
+  switch ($instance['widget']['type']) {
+    case 'mapbox_field_field' :
+
+      // @todo: remove comment below
+      // variable_get with 'entity_view_modes' as used elsewhere in this module 
+      // may be empty, so an alternate method of retrieving view modes is used here
+      // Field definitions were copied from: mapbox_json_pane.inc
+      
+      // prepare a list of viewmodes
+      $entity_info = entity_get_info('node');
+      $view_modes = array_keys($entity_info['view modes']); //variable_get('entity_view_modes', array());
+      $options = array();
+
+      foreach ($view_modes as $type => $view_mode) {
+          $options[$type] = $view_mode;
+      }
+
+      $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
+
+      $element['mapbox'] = array(
+        '#type' => 'fieldset',
+        '#title' => $element['#title'],
+        '#tree' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_id'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Mapbox ID'),
+        '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
+        '#default_value' => isset($items[$delta]['mapbox_id']) ? $items[$delta]['mapbox_id'] : '',
+        '#attributes' => array('maxlength' => 255),
+        '#mandatory' => TRUE,
+      );
+      $element['mapbox']['mapbox_json'] = array(
+        '#type' => 'textfield',
+        '#title' => t('JSON'),
+        '#description' => t('Path / URL to JSON file'),
+        '#default_value' => isset($items[$delta]['mapbox_json']) ? $items[$delta]['mapbox_json'] : '',
+        '#attributes' => array('maxlength' => 255),
+        '#mandatory' => FALSE,
+      );
+      $element['mapbox']['mapbox_max_zoom'] = array(
+        '#type' => 'select',
+        '#title' => t('Max zoom level'),
+        '#description' => t('The maximum level of zoom (the higher the level, the closer)'),
+        '#default_value' => isset($items[$delta]['mapbox_max_zoom']) ? $items[$delta]['mapbox_max_zoom'] : 12,
+        '#options' => array(
+          1 => 1,
+          2 => 2,
+          3 => 3,
+          4 => 4,
+          5 => 5,
+          6 => 6,
+          7 => 7,
+          8 => 8,
+          9 => 9,
+          10 => 10,
+          11 => 11,
+          12 => 12,
+          13 => 13,
+          14 => 14,
+          15 => 15,
+          16 => 16,
+          17 => 17,
+          18 => 18,
+        ),
+        '#mandatory' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_marker'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Marker'),
+        '#description' => t('Fields used to get marker\'s basic information'),
+        '#collapsible' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_marker']['popup'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Popup'),
+        '#description' => t('Show a popup when clicking the marker'),
+        '#default_value' => isset($items[$delta]['mapbox_marker_popup']) ? $items[$delta]['mapbox_marker_popup'] : FALSE,
+      );
+
+      $element['mapbox']['mapbox_marker']['popup_viewmode'] = array(
+        '#type' => 'select',
+        '#title' => t('Viewmode'),
+        '#options' => $options,
+        '#description' => t('Viewmode to be used when displaying the popup'),
+        '#default_value' => isset($items[$delta]['mapbox_marker_popup_viewmode']) ? $items[$delta]['mapbox_marker_popup_viewmode'] : '',
+        '#states' => array(
+          'invisible' => array(
+            'input[name="popup"]' => array('checked' => FALSE),
+          ),
+        ),
+      );
+
+      $element['mapbox']['mapbox_marker']['legend'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Mapbox Legend'),
+        '#description' => t('Will show a legend below the map with all marker type'),
+        '#default_value' => isset($items[$delta]['mapbox_marker_legend']) ? $items[$delta]['mapbox_marker_legend'] : FALSE,
+        '#mandatory' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_marker']['cluster'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Cluster'),
+        '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/leaflet-markercluster/', array('attributes' => array('target' => '_blank'))))),
+        '#default_value' => isset($items[$delta]['mapbox_marker_cluster']) ? $items[$delta]['mapbox_marker_cluster'] : FALSE,
+        '#mandatory' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_marker']['proximity'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Proximity Search'),
+        '#description' => t('Enables the proximity search feeature, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/geocoding-auto/', array('attributes' => array('target' => '_blank'))))),
+        '#default_value' => isset($items[$delta]['mapbox_marker_proximity']) ? $items[$delta]['mapbox_marker_proximity'] : FALSE,
+        '#mandatory' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_marker']['filter'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Mapbox Filter'),
+        '#description' => t('Filter markers based on the "filter" attribute within the JSON'),
+        '#default_value' => isset($items[$delta]['mapbox_marker_filter']) ? $items[$delta]['mapbox_marker_filter'] : FALSE,
+        '#mandatory' => TRUE,
+      );
+
+      $element['mapbox']['mapbox_marker']['filter_fields'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Filter fields'),
+        '#description' => t('Name of the field that acts as a filter from the json and how it should be displayed. E.g. country:select (allowed: select, checkbox, radio) will render a select list with all the values from the "country" attribute inside the JSON, separate multiple fields by a comma.'),
+        '#states' => array(
+          'invisible' => array(
+            'input[name="filter"]' => array('checked' => FALSE),
+          ),
+        ),
+        '#default_value' => isset($items[$delta]['mapbox_marker_filter_fields']) ? $items[$delta]['mapbox_marker_filter_fields'] : '  ',
+        '#attributes' => array('maxlength' => 255),
+      );
+      break;
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_presave().
+ */
+function mapbox_field_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // This is necessary, as we are using a fieldset to contain all our field items.
+  // We need to map our form values from their fieldset to the correct place in the schema for saving.
+  // @todo: Improve this mapping, perhaps can be streamlined with one of the PHP array functions
+  foreach ($items as $delta => $item) {
+    if (isset($item['mapbox']['mapbox_id'])) {
+      $items[$delta]['mapbox_id'] = $item['mapbox']['mapbox_id'];
+      $items[$delta]['mapbox_json'] = $item['mapbox']['mapbox_json'];
+      $items[$delta]['mapbox_max_zoom'] = $item['mapbox']['mapbox_max_zoom'];
+      $items[$delta]['mapbox_marker_popup'] = $item['mapbox']['mapbox_marker']['popup'];
+      $items[$delta]['mapbox_marker_popup_viewmode'] = $item['mapbox']['mapbox_marker']['popup_viewmode'];
+      $items[$delta]['mapbox_marker_legend'] = $item['mapbox']['mapbox_marker']['legend'];
+      $items[$delta]['mapbox_marker_cluster'] = $item['mapbox']['mapbox_marker']['cluster'];
+      $items[$delta]['mapbox_marker_proximity'] = $item['mapbox']['mapbox_marker']['proximity'];
+      $items[$delta]['mapbox_marker_filter'] = $item['mapbox']['mapbox_marker']['filter'];
+      $items[$delta]['mapbox_marker_filter_fields'] = $item['mapbox']['mapbox_marker']['filter_fields'];
+    }
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function mapbox_field_field_is_empty($item, $field) {
+
+  // @todo: Confirm the minimum fields required to be a valid Mapbox entry, assuming only 'mapbox_id'
+  if (empty($item['mapbox']['mapbox_id'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function mapbox_field_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  // Loop through field items in the case of multiple values.
+  foreach ($items as $delta => $item) {
+    // @todo: Apply validation rules as appropriate.
+    //   e.g. ensure mapbox_json file specified is either a valid URL or local file
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function mapbox_field_field_formatter_info() {
+  return array(
+    'mapbox_field_default' => array(
+      'label' => t('Default'),
+      'field types' => array('mapbox'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function mapbox_field_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+    case 'mapbox_field_default' :
+      foreach ($items as $delta => $item) {
+        if (isset($item['mapbox_id'])) {
+          // @todo: Render the map fully using all the field options provided
+          $element[$delta]['#markup'] = mapbox_bridge_render_map($item['mapbox_id'], FALSE, 'mapbox-node');
+          // @todo: Remove this line, here only to show contents of field for debugging
+          $element[$delta]['#markup'] .= var_export($item, TRUE);
+        }
+      }
+      break;
+  }
+  return $element;
+}

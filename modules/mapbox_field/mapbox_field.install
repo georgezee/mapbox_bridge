@@ -1,0 +1,78 @@
+<?php
+/**
+ * @file
+ * Install functions for the Mapbox Field module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function mapbox_field_field_schema($field) {
+  // @todo: Confirm that no indexes would be needed on this field. It seems
+  //        unlikely this element would ever be used to sort or filter on,
+  //        so it seems unnecessary
+  return array(
+    'columns' => array(
+      'mapbox_id' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'mapbox_json' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'mapbox_max_zoom' => array(
+        'type' => 'int',
+        'default' => 12,
+        'not null' => TRUE,
+      ),
+      'mapbox_marker_popup' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'mapbox_marker_popup_viewmode' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => FALSE,
+      ),
+      'mapbox_marker_legend' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'mapbox_marker_cluster' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'mapbox_marker_proximity' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'mapbox_marker_filter' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'mapbox_marker_filter_fields' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+  );
+}
